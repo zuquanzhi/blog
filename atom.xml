@@ -6,7 +6,7 @@
   <link href="http://zuweicun.top/atom.xml" rel="self"/>
   
   <link href="http://zuweicun.top/"/>
-  <updated>2024-09-18T06:28:55.368Z</updated>
+  <updated>2024-09-18T15:44:42.680Z</updated>
   <id>http://zuweicun.top/</id>
   
   <author>
@@ -15,6 +15,31 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>screen命令应用</title>
+    <link href="http://zuweicun.top/2024/09/18/screen%E5%91%BD%E4%BB%A4%E5%BA%94%E7%94%A8/"/>
+    <id>http://zuweicun.top/2024/09/18/screen%E5%91%BD%E4%BB%A4%E5%BA%94%E7%94%A8/</id>
+    <published>2024-09-18T15:42:35.000Z</published>
+    <updated>2024-09-18T15:44:42.680Z</updated>
+    
+    <content type="html"><![CDATA[<p><code>screen</code> 是一个非常强大的终端会话管理工具，它可以让你在多个终端窗口中运行任务，并在会话断开后继续保持任务的执行状态。特别适合长时间运行的任务或远程连接的任务管理。<br>对于远程服务器player简直是屠龙宝刀。</p><h3 id="常见用法："><a href="#常见用法：" class="headerlink" title="常见用法："></a>常见用法：</h3><p>以下是一些常见的 <code>screen</code> 命令和用法：</p><h4 id="1-启动新的-screen-会话"><a href="#1-启动新的-screen-会话" class="headerlink" title="1. 启动新的 screen 会话"></a>1. <strong>启动新的 <code>screen</code> 会话</strong></h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">screen</span><br></pre></td></tr></table></figure><ul><li>启动一个新的 <code>screen</code> 会话。在新窗口中，你可以运行任何命令。</li><li>默认情况下，<code>screen</code> 会自动分配一个会话 ID。</li></ul><h4 id="2-启动带名称的-screen-会话"><a href="#2-启动带名称的-screen-会话" class="headerlink" title="2. 启动带名称的 screen 会话"></a>2. <strong>启动带名称的 <code>screen</code> 会话</strong></h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">screen -S session_name</span><br></pre></td></tr></table></figure><ul><li>通过 <code>-S</code> 选项为会话指定名称 <code>session_name</code>，便于管理多个会话。</li></ul><h4 id="3-分离（Detach）会话"><a href="#3-分离（Detach）会话" class="headerlink" title="3. 分离（Detach）会话"></a>3. <strong>分离（Detach）会话</strong></h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Ctrl + A + D</span><br></pre></td></tr></table></figure><ul><li>使用快捷键 <code>Ctrl + A + D</code>，可以将当前会话暂时分离（detach），但命令仍会继续在后台执行。</li></ul><h4 id="4-恢复（Reattach）已分离的会话"><a href="#4-恢复（Reattach）已分离的会话" class="headerlink" title="4. 恢复（Reattach）已分离的会话"></a>4. <strong>恢复（Reattach）已分离的会话</strong></h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">screen -r</span><br></pre></td></tr></table></figure><ul><li>恢复上一个分离的 <code>screen</code> 会话。</li></ul><h4 id="5-查看现有-screen-会话"><a href="#5-查看现有-screen-会话" class="headerlink" title="5. 查看现有 screen 会话"></a>5. <strong>查看现有 <code>screen</code> 会话</strong></h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">screen -<span class="built_in">ls</span></span><br></pre></td></tr></table></figure><ul><li>列出当前所有的 <code>screen</code> 会话，包括那些分离的会话。例如：<figure class="highlight stylus"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">There are screens on:</span><br><span class="line">    <span class="number">1234</span><span class="selector-class">.session_name</span>    (Detached)</span><br><span class="line">    <span class="number">5678</span><span class="selector-class">.pts-0</span><span class="selector-class">.hostname</span>  (Attached)</span><br></pre></td></tr></table></figure></li></ul><h4 id="6-恢复指定的会话"><a href="#6-恢复指定的会话" class="headerlink" title="6. 恢复指定的会话"></a>6. <strong>恢复指定的会话</strong></h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">screen -r session_name</span><br></pre></td></tr></table></figure><ul><li>恢复名为 <code>session_name</code> 的会话。你可以通过 <code>screen -ls</code> 查看到所有会话名称。</li></ul><h4 id="7-杀掉-screen-会话"><a href="#7-杀掉-screen-会话" class="headerlink" title="7. 杀掉 screen 会话"></a>7. <strong>杀掉 <code>screen</code> 会话</strong></h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">screen -X -S session_name quit</span><br></pre></td></tr></table></figure><ul><li><code>-S session_name</code> 指定会话名，<code>-X quit</code> 用于杀掉该会话。</li></ul><h4 id="8-在会话中分屏操作"><a href="#8-在会话中分屏操作" class="headerlink" title="8. 在会话中分屏操作"></a>8. <strong>在会话中分屏操作</strong></h4><ul><li><p><strong>水平分屏：</strong></p><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Ctrl + A + S</span><br></pre></td></tr></table></figure><p>然后使用 <code>Ctrl + A + Tab</code> 来在不同的屏幕之间切换。</p></li><li><p><strong>垂直分屏：</strong></p><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Ctrl + A + |  <span class="comment"># 使用 | 进行垂直分屏</span></span><br></pre></td></tr></table></figure></li><li><p><strong>关闭分屏：</strong><br>将光标聚焦到需要关闭的分屏窗口中，使用命令：</p><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Ctrl + A + X</span><br></pre></td></tr></table></figure></li></ul><h4 id="9-退出-screen-会话"><a href="#9-退出-screen-会话" class="headerlink" title="9. 退出 screen 会话"></a>9. <strong>退出 <code>screen</code> 会话</strong></h4><p>在会话窗口中直接输入 <code>exit</code>，或在分屏中通过 <code>Ctrl + A + X</code> 来关闭。</p><hr>]]></content>
+    
+    
+      
+      
+    <summary type="html">&lt;p&gt;&lt;code&gt;screen&lt;/code&gt; 是一个非常强大的终端会话管理工具，它可以让你在多个终端窗口中运行任务，并在会话断开后继续保持任务的执行状态。特别适合长时间运行的任务或远程连接的任务管理。&lt;br&gt;对于远程服务器player简直是屠龙宝刀。&lt;/p&gt;
+&lt;h3 id=&quot;常见</summary>
+      
+    
+    
+    
+    <category term="科研" scheme="http://zuweicun.top/categories/%E7%A7%91%E7%A0%94/"/>
+    
+    
+    <category term="命令" scheme="http://zuweicun.top/tags/%E5%91%BD%E4%BB%A4/"/>
+    
+  </entry>
   
   <entry>
     <title>yolo初步</title>
@@ -430,27 +455,6 @@
     
     
     <summary type="html">&lt;h1 id=&quot;反转链表&quot;&gt;&lt;a href=&quot;#反转链表&quot; class=&quot;headerlink&quot; title=&quot;反转链表&quot;&gt;&lt;/a&gt;&lt;a href=&quot;https://leetcode.cn/problems/reverse-linked-list/&quot;&gt;反转链表&lt;/a&gt;&lt;/h1&gt;&lt;h2 id=&quot;题目描述&quot;&gt;&lt;a href=&quot;#题目描述&quot; class=&quot;headerlink&quot; title=&quot;题目描述&quot;&gt;&lt;/a&gt;题目描述&lt;/h2&gt;&lt;p&gt;给你单链表的头节点 &lt;code&gt;head&lt;/code&gt; ，请你反转链表，并返回反转后的链表。&lt;/p&gt;</summary>
-    
-    
-    
-    <category term="题解" scheme="http://zuweicun.top/categories/%E9%A2%98%E8%A7%A3/"/>
-    
-    
-    <category term="链表" scheme="http://zuweicun.top/tags/%E9%93%BE%E8%A1%A8/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>Leetcode83</title>
-    <link href="http://zuweicun.top/2023/11/30/Leetcode83/"/>
-    <id>http://zuweicun.top/2023/11/30/Leetcode83/</id>
-    <published>2023-11-30T11:02:34.000Z</published>
-    <updated>2024-09-18T06:28:55.363Z</updated>
-    
-    <content type="html"><![CDATA[<h1 id="删除排序链表中的重复元素"><a href="#删除排序链表中的重复元素" class="headerlink" title="删除排序链表中的重复元素"></a><a href="https://leetcode.cn/problems/remove-duplicates-from-sorted-list/">删除排序链表中的重复元素</a></h1><h2 id="题目描述"><a href="#题目描述" class="headerlink" title="题目描述"></a>题目描述</h2><p>给定一个已排序的链表的头 <code>head</code> ， <em>删除所有重复的元素，使每个元素只出现一次</em> 。返回 <em>已排序的链表</em> 。</p><span id="more"></span><p><strong>示例 1：</strong></p><p><img src="https://assets.leetcode.com/uploads/2021/01/04/list1.jpg" alt="img"></p><figure class="highlight inform7"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">输入：head = <span class="comment">[1,1,2]</span></span><br><span class="line">输出：<span class="comment">[1,2]</span></span><br></pre></td></tr></table></figure><p><strong>示例 2：</strong></p><p><img src="https://assets.leetcode.com/uploads/2021/01/04/list2.jpg" alt="img"></p><figure class="highlight inform7"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">输入：head = <span class="comment">[1,1,2,3,3]</span></span><br><span class="line">输出：<span class="comment">[1,2,3]</span></span><br></pre></td></tr></table></figure><p><strong>提示：</strong></p><ul><li>链表中节点数目在范围 <code>[0, 300]</code> 内</li><li><code>-100 &lt;= Node.val &lt;= 100</code></li><li>题目数据保证链表已经按升序 <strong>排列</strong></li></ul><h2 id="基本思路"><a href="#基本思路" class="headerlink" title="基本思路"></a>基本思路</h2><p>根据题干描述，链表已经按照升序排列，即只需要判断前后两个节点是否相等从而确定删除与否即可。</p><p>代码如下：</p><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * Definition for singly-linked list.</span></span><br><span class="line"><span class="comment"> * struct ListNode &#123;</span></span><br><span class="line"><span class="comment"> *     int val;</span></span><br><span class="line"><span class="comment"> *     struct ListNode *next;</span></span><br><span class="line"><span class="comment"> * &#125;;</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">struct</span> ListNode* <span class="title function_">deleteDuplicates</span><span class="params">(<span class="keyword">struct</span> ListNode* head)</span> &#123;</span><br><span class="line">    <span class="keyword">if</span> (!head) &#123;</span><br><span class="line">        <span class="keyword">return</span> head;<span class="comment">//即链表为空，没有重复元素可以删除。</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">ListNode</span>* <span class="title">cur</span> =</span> head;</span><br><span class="line">    <span class="keyword">while</span> (cur-&gt;next) &#123;<span class="comment">//条件是当前节点的下一个节点不为空</span></span><br><span class="line">        <span class="keyword">if</span> (cur-&gt;val == cur-&gt;next-&gt;val) &#123;</span><br><span class="line">            cur-&gt;next = cur-&gt;next-&gt;next;</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            cur = cur-&gt;next;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> head;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>]]></content>
-    
-    
-    <summary type="html">&lt;h1 id=&quot;删除排序链表中的重复元素&quot;&gt;&lt;a href=&quot;#删除排序链表中的重复元素&quot; class=&quot;headerlink&quot; title=&quot;删除排序链表中的重复元素&quot;&gt;&lt;/a&gt;&lt;a href=&quot;https://leetcode.cn/problems/remove-duplicates-from-sorted-list/&quot;&gt;删除排序链表中的重复元素&lt;/a&gt;&lt;/h1&gt;&lt;h2 id=&quot;题目描述&quot;&gt;&lt;a href=&quot;#题目描述&quot; class=&quot;headerlink&quot; title=&quot;题目描述&quot;&gt;&lt;/a&gt;题目描述&lt;/h2&gt;&lt;p&gt;给定一个已排序的链表的头 &lt;code&gt;head&lt;/code&gt; ， &lt;em&gt;删除所有重复的元素，使每个元素只出现一次&lt;/em&gt; 。返回 &lt;em&gt;已排序的链表&lt;/em&gt; 。&lt;/p&gt;</summary>
     
     
     

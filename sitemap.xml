@@ -2,6 +2,15 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>http://zuweicun.top/2024/09/18/screen%E5%91%BD%E4%BB%A4%E5%BA%94%E7%94%A8/</loc>
+    
+    <lastmod>2024-09-18</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
     <loc>http://zuweicun.top/2024/01/12/OpenCV%E5%AD%A6%E4%B9%A0/</loc>
     
     <lastmod>2024-09-18</lastmod>
@@ -535,6 +544,13 @@
     <priority>0.2</priority>
   </url>
   
+  <url>
+    <loc>http://zuweicun.top/tags/%E5%91%BD%E4%BB%A4/</loc>
+    <lastmod>2024-09-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
 
   
   <url>
@@ -588,6 +604,13 @@
   
   <url>
     <loc>http://zuweicun.top/categories/%E8%B9%AD%E9%A5%AD%E5%9B%BE/</loc>
+    <lastmod>2024-09-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>http://zuweicun.top/categories/%E7%A7%91%E7%A0%94/</loc>
     <lastmod>2024-09-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
