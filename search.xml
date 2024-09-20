@@ -1438,7 +1438,7 @@
 <p>（萌新勿骂）</p>
 ]]></content>
       <categories>
-        <category>算法</category>
+        <category>数据结构与算法</category>
       </categories>
       <tags>
         <tag>正则匹配</tag>
@@ -1874,7 +1874,7 @@
 
 ]]></content>
       <categories>
-        <category>算法</category>
+        <category>数据结构与算法</category>
       </categories>
       <tags>
         <tag>排序</tag>
@@ -1890,7 +1890,7 @@
 
 ]]></content>
       <categories>
-        <category>笔记</category>
+        <category>屎山</category>
       </categories>
       <tags>
         <tag>C语言</tag>
@@ -1927,7 +1927,7 @@
 <figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="type">int</span> <span class="title function_">gcd</span><span class="params">(<span class="type">int</span> a,<span class="type">int</span> b)</span>&#123;</span><br><span class="line">	<span class="keyword">if</span>(b==<span class="number">0</span>)&#123;</span><br><span class="line">		<span class="keyword">return</span> a;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">else</span> <span class="keyword">return</span> (b,a%b);</span><br><span class="line">&#125; </span><br></pre></td></tr></table></figure>
 ]]></content>
       <categories>
-        <category>算法</category>
+        <category>数据结构与算法</category>
       </categories>
       <tags>
         <tag>算法</tag>
@@ -2223,7 +2223,7 @@
 
 ]]></content>
       <categories>
-        <category>算法</category>
+        <category>数据结构与算法</category>
       </categories>
       <tags>
         <tag>c语言</tag>
@@ -2282,7 +2282,7 @@
 <p>但是在很多大规模问题中，寻找最优解是一件相当费时耗力的事情，有时候付出大量人力物力财力后，回报并不与投入成正比。在这个时候选择相对最优的贪心算法就比较经济可行了。有的问题对最优的要求不是很高，在充分衡量付出和回报后，选择贪心算法未尝不是一种不错的选择。</p>
 ]]></content>
       <categories>
-        <category>算法</category>
+        <category>数据结构与算法</category>
       </categories>
       <tags>
         <tag>算法</tag>
@@ -2311,7 +2311,7 @@
 
 ]]></content>
       <categories>
-        <category>笔记</category>
+        <category>屎山</category>
       </categories>
       <tags>
         <tag>c语言</tag>
@@ -2345,7 +2345,7 @@
 <p>总之大多数需要根据现实情况变通。。。。</p>
 ]]></content>
       <categories>
-        <category>算法</category>
+        <category>数据结构与算法</category>
       </categories>
       <tags>
         <tag>高精度</tag>
