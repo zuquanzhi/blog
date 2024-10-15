@@ -91,49 +91,6 @@
       </tags>
   </entry>
   <entry>
-    <title>KMP</title>
-    <url>/2024/09/20/KMP/</url>
-    <content><![CDATA[<h1 id="KMP-算法（Knuth-Morris-Pratt）笔记"><a href="#KMP-算法（Knuth-Morris-Pratt）笔记" class="headerlink" title="KMP 算法（Knuth-Morris-Pratt）笔记"></a>KMP 算法（Knuth-Morris-Pratt）笔记</h1><h2 id="1-算法简介"><a href="#1-算法简介" class="headerlink" title="1. 算法简介"></a>1. 算法简介</h2><p>KMP 算法用于 <strong>字符串匹配</strong>，通过预处理模式串，避免重复的字符比较，从而实现高效匹配。它的时间复杂度是 <strong>O(n + m)</strong>，其中 n 是主串长度，m 是模式串长度。</p>
-<h2 id="2-主要思想"><a href="#2-主要思想" class="headerlink" title="2. 主要思想"></a>2. 主要思想</h2><p>当模式串中的某个字符匹配失败时，利用已知的部分匹配结果，跳过不必要的比较。这是通过 <strong>部分匹配表</strong>（也称为 <strong>前缀表</strong>）实现的。</p>
-<h2 id="3-术语解释"><a href="#3-术语解释" class="headerlink" title="3. 术语解释"></a>3. 术语解释</h2><ul>
-<li><strong>前缀</strong>：从字符串的第一个字符开始，不包含最后一个字符的子串。</li>
-<li><strong>后缀</strong>：从字符串的最后一个字符开始，不包含第一个字符的子串。</li>
-<li><strong>部分匹配表</strong>：记录每个字符位置前的部分字符串的最长相同前缀和后缀的长度。</li>
-</ul>
-<h2 id="4-部分匹配表的构建"><a href="#4-部分匹配表的构建" class="headerlink" title="4. 部分匹配表的构建"></a>4. 部分匹配表的构建</h2><p>部分匹配表记录模式串在匹配失败时，可以跳过的字符数量。假设模式串为 <code>pattern</code>，前缀表 <code>prefix[i]</code> 的值表示在 <code>pattern[0...i]</code> 中，最长相同前缀和后缀的长度。</p>
-<p><strong>构建步骤</strong>：</p>
-<ol>
-<li>初始时，<code>prefix[0] = 0</code>，表示第一个字符没有前缀和后缀。</li>
-<li>使用双指针法遍历模式串，一个指针指向当前字符，一个指向最长前缀的下一个字符。</li>
-<li>若当前字符匹配，前缀长度加 1；否则，回退到前一个匹配的前缀位置。</li>
-</ol>
-<h2 id="5-KMP-主算法步骤"><a href="#5-KMP-主算法步骤" class="headerlink" title="5. KMP 主算法步骤"></a>5. KMP 主算法步骤</h2><ol>
-<li>预处理模式串，计算其部分匹配表。</li>
-<li>在主串中按顺序比较字符，若匹配成功，则继续比较下一个字符；若匹配失败，根据部分匹配表跳过一部分字符，减少不必要的比较。</li>
-<li>重复步骤 2 直到找到所有匹配位置或遍历完整个主串。</li>
-</ol>
-<h2 id="6-KMP-代码实现"><a href="#6-KMP-代码实现" class="headerlink" title="6. KMP 代码实现"></a>6. KMP 代码实现</h2><figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;cstring&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 计算部分匹配表（前缀表）</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">computePrefixFunction</span><span class="params">(<span class="type">const</span> <span class="type">char</span>* pattern, <span class="type">int</span> m, <span class="type">int</span>* prefix)</span> </span>&#123;</span><br><span class="line">    <span class="type">int</span> k = <span class="number">0</span>;</span><br><span class="line">    prefix[<span class="number">0</span>] = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">1</span>; i &lt; m; ++i) &#123;</span><br><span class="line">        <span class="keyword">while</span> (k &gt; <span class="number">0</span> &amp;&amp; pattern[k] != pattern[i]) &#123;</span><br><span class="line">            k = prefix[k - <span class="number">1</span>];</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (pattern[k] == pattern[i]) &#123;</span><br><span class="line">            ++k;</span><br><span class="line">        &#125;</span><br><span class="line">        prefix[i] = k;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// KMP 主算法，返回匹配的起始位置</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">kmpSearch</span><span class="params">(<span class="type">const</span> <span class="type">char</span>* text, <span class="type">const</span> <span class="type">char</span>* pattern, <span class="type">int</span>* matches, <span class="type">int</span>&amp; match_count)</span> </span>&#123;</span><br><span class="line">    <span class="type">int</span> n = <span class="built_in">strlen</span>(text);</span><br><span class="line">    <span class="type">int</span> m = <span class="built_in">strlen</span>(pattern);</span><br><span class="line">    <span class="type">int</span> prefix[m];</span><br><span class="line">    <span class="built_in">computePrefixFunction</span>(pattern, m, prefix);</span><br><span class="line"></span><br><span class="line">    <span class="type">int</span> q = <span class="number">0</span>;</span><br><span class="line">    match_count = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; n; ++i) &#123;</span><br><span class="line">        <span class="keyword">while</span> (q &gt; <span class="number">0</span> &amp;&amp; pattern[q] != text[i]) &#123;</span><br><span class="line">            q = prefix[q - <span class="number">1</span>];</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (pattern[q] == text[i]) &#123;</span><br><span class="line">            ++q;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (q == m) &#123;</span><br><span class="line">            matches[match_count++] = i - m + <span class="number">1</span>;</span><br><span class="line">            q = prefix[q - <span class="number">1</span>];</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="type">const</span> <span class="type">char</span>* text = <span class="string">&quot;ABABDABACDABABCABAB&quot;</span>;</span><br><span class="line">    <span class="type">const</span> <span class="type">char</span>* pattern = <span class="string">&quot;ABABCABAB&quot;</span>;</span><br><span class="line">    <span class="type">int</span> matches[<span class="number">100</span>];</span><br><span class="line">    <span class="type">int</span> match_count;</span><br><span class="line">    <span class="built_in">kmpSearch</span>(text, pattern, matches, match_count);</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">if</span> (match_count == <span class="number">0</span>) &#123;</span><br><span class="line">        cout &lt;&lt; <span class="string">&quot;未找到匹配&quot;</span> &lt;&lt; endl;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        cout &lt;&lt; <span class="string">&quot;匹配位置：&quot;</span>;</span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; match_count; ++i) &#123;</span><br><span class="line">            cout &lt;&lt; matches[i] &lt;&lt; <span class="string">&quot; &quot;</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        cout &lt;&lt; endl;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h2 id="7-时间复杂度"><a href="#7-时间复杂度" class="headerlink" title="7. 时间复杂度"></a>7. 时间复杂度</h2><ul>
-<li><strong>预处理模式串</strong>：O(m)</li>
-<li><strong>主串匹配</strong>：O(n)<br>因此，整个算法的时间复杂度为 <strong>O(n + m)</strong>。</li>
-</ul>
-<h2 id="8-应用场景"><a href="#8-应用场景" class="headerlink" title="8. 应用场景"></a>8. 应用场景</h2><p>KMP 算法适用于以下场景：</p>
-<ul>
-<li>字符串匹配问题，例如在文本中查找某个单词或子字符串。</li>
-<li>DNA 序列匹配等生物信息学领域。</li>
-</ul>
-<h2 id="9-优势"><a href="#9-优势" class="headerlink" title="9. 优势"></a>9. 优势</h2><ul>
-<li>当模式串包含大量重复部分时，KMP 算法能显著减少比较次数，效率高于朴素的字符串匹配算法。</li>
-</ul>
-]]></content>
-      <categories>
-        <category>数据结构与算法</category>
-      </categories>
-      <tags>
-        <tag>数据结构</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>718校内赛技术报告</title>
     <url>/2023/11/27/718%E6%A0%A1%E5%86%85%E8%B5%9B%E6%8A%80%E6%9C%AF%E6%8A%A5%E5%91%8A/</url>
     <content><![CDATA[<p>此篇博客用于记录校内赛的技术细节和感悟（屎山预警！！！）</p>
@@ -293,6 +250,49 @@
       </tags>
   </entry>
   <entry>
+    <title>KMP</title>
+    <url>/2024/09/20/KMP/</url>
+    <content><![CDATA[<h1 id="KMP-算法（Knuth-Morris-Pratt）笔记"><a href="#KMP-算法（Knuth-Morris-Pratt）笔记" class="headerlink" title="KMP 算法（Knuth-Morris-Pratt）笔记"></a>KMP 算法（Knuth-Morris-Pratt）笔记</h1><h2 id="1-算法简介"><a href="#1-算法简介" class="headerlink" title="1. 算法简介"></a>1. 算法简介</h2><p>KMP 算法用于 <strong>字符串匹配</strong>，通过预处理模式串，避免重复的字符比较，从而实现高效匹配。它的时间复杂度是 <strong>O(n + m)</strong>，其中 n 是主串长度，m 是模式串长度。</p>
+<h2 id="2-主要思想"><a href="#2-主要思想" class="headerlink" title="2. 主要思想"></a>2. 主要思想</h2><p>当模式串中的某个字符匹配失败时，利用已知的部分匹配结果，跳过不必要的比较。这是通过 <strong>部分匹配表</strong>（也称为 <strong>前缀表</strong>）实现的。</p>
+<h2 id="3-术语解释"><a href="#3-术语解释" class="headerlink" title="3. 术语解释"></a>3. 术语解释</h2><ul>
+<li><strong>前缀</strong>：从字符串的第一个字符开始，不包含最后一个字符的子串。</li>
+<li><strong>后缀</strong>：从字符串的最后一个字符开始，不包含第一个字符的子串。</li>
+<li><strong>部分匹配表</strong>：记录每个字符位置前的部分字符串的最长相同前缀和后缀的长度。</li>
+</ul>
+<h2 id="4-部分匹配表的构建"><a href="#4-部分匹配表的构建" class="headerlink" title="4. 部分匹配表的构建"></a>4. 部分匹配表的构建</h2><p>部分匹配表记录模式串在匹配失败时，可以跳过的字符数量。假设模式串为 <code>pattern</code>，前缀表 <code>prefix[i]</code> 的值表示在 <code>pattern[0...i]</code> 中，最长相同前缀和后缀的长度。</p>
+<p><strong>构建步骤</strong>：</p>
+<ol>
+<li>初始时，<code>prefix[0] = 0</code>，表示第一个字符没有前缀和后缀。</li>
+<li>使用双指针法遍历模式串，一个指针指向当前字符，一个指向最长前缀的下一个字符。</li>
+<li>若当前字符匹配，前缀长度加 1；否则，回退到前一个匹配的前缀位置。</li>
+</ol>
+<h2 id="5-KMP-主算法步骤"><a href="#5-KMP-主算法步骤" class="headerlink" title="5. KMP 主算法步骤"></a>5. KMP 主算法步骤</h2><ol>
+<li>预处理模式串，计算其部分匹配表。</li>
+<li>在主串中按顺序比较字符，若匹配成功，则继续比较下一个字符；若匹配失败，根据部分匹配表跳过一部分字符，减少不必要的比较。</li>
+<li>重复步骤 2 直到找到所有匹配位置或遍历完整个主串。</li>
+</ol>
+<h2 id="6-KMP-代码实现"><a href="#6-KMP-代码实现" class="headerlink" title="6. KMP 代码实现"></a>6. KMP 代码实现</h2><figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;cstring&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 计算部分匹配表（前缀表）</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">computePrefixFunction</span><span class="params">(<span class="type">const</span> <span class="type">char</span>* pattern, <span class="type">int</span> m, <span class="type">int</span>* prefix)</span> </span>&#123;</span><br><span class="line">    <span class="type">int</span> k = <span class="number">0</span>;</span><br><span class="line">    prefix[<span class="number">0</span>] = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">1</span>; i &lt; m; ++i) &#123;</span><br><span class="line">        <span class="keyword">while</span> (k &gt; <span class="number">0</span> &amp;&amp; pattern[k] != pattern[i]) &#123;</span><br><span class="line">            k = prefix[k - <span class="number">1</span>];</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (pattern[k] == pattern[i]) &#123;</span><br><span class="line">            ++k;</span><br><span class="line">        &#125;</span><br><span class="line">        prefix[i] = k;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// KMP 主算法，返回匹配的起始位置</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">kmpSearch</span><span class="params">(<span class="type">const</span> <span class="type">char</span>* text, <span class="type">const</span> <span class="type">char</span>* pattern, <span class="type">int</span>* matches, <span class="type">int</span>&amp; match_count)</span> </span>&#123;</span><br><span class="line">    <span class="type">int</span> n = <span class="built_in">strlen</span>(text);</span><br><span class="line">    <span class="type">int</span> m = <span class="built_in">strlen</span>(pattern);</span><br><span class="line">    <span class="type">int</span> prefix[m];</span><br><span class="line">    <span class="built_in">computePrefixFunction</span>(pattern, m, prefix);</span><br><span class="line"></span><br><span class="line">    <span class="type">int</span> q = <span class="number">0</span>;</span><br><span class="line">    match_count = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; n; ++i) &#123;</span><br><span class="line">        <span class="keyword">while</span> (q &gt; <span class="number">0</span> &amp;&amp; pattern[q] != text[i]) &#123;</span><br><span class="line">            q = prefix[q - <span class="number">1</span>];</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (pattern[q] == text[i]) &#123;</span><br><span class="line">            ++q;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (q == m) &#123;</span><br><span class="line">            matches[match_count++] = i - m + <span class="number">1</span>;</span><br><span class="line">            q = prefix[q - <span class="number">1</span>];</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="type">const</span> <span class="type">char</span>* text = <span class="string">&quot;ABABDABACDABABCABAB&quot;</span>;</span><br><span class="line">    <span class="type">const</span> <span class="type">char</span>* pattern = <span class="string">&quot;ABABCABAB&quot;</span>;</span><br><span class="line">    <span class="type">int</span> matches[<span class="number">100</span>];</span><br><span class="line">    <span class="type">int</span> match_count;</span><br><span class="line">    <span class="built_in">kmpSearch</span>(text, pattern, matches, match_count);</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">if</span> (match_count == <span class="number">0</span>) &#123;</span><br><span class="line">        cout &lt;&lt; <span class="string">&quot;未找到匹配&quot;</span> &lt;&lt; endl;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        cout &lt;&lt; <span class="string">&quot;匹配位置：&quot;</span>;</span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; match_count; ++i) &#123;</span><br><span class="line">            cout &lt;&lt; matches[i] &lt;&lt; <span class="string">&quot; &quot;</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        cout &lt;&lt; endl;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="7-时间复杂度"><a href="#7-时间复杂度" class="headerlink" title="7. 时间复杂度"></a>7. 时间复杂度</h2><ul>
+<li><strong>预处理模式串</strong>：O(m)</li>
+<li><strong>主串匹配</strong>：O(n)<br>因此，整个算法的时间复杂度为 <strong>O(n + m)</strong>。</li>
+</ul>
+<h2 id="8-应用场景"><a href="#8-应用场景" class="headerlink" title="8. 应用场景"></a>8. 应用场景</h2><p>KMP 算法适用于以下场景：</p>
+<ul>
+<li>字符串匹配问题，例如在文本中查找某个单词或子字符串。</li>
+<li>DNA 序列匹配等生物信息学领域。</li>
+</ul>
+<h2 id="9-优势"><a href="#9-优势" class="headerlink" title="9. 优势"></a>9. 优势</h2><ul>
+<li>当模式串包含大量重复部分时，KMP 算法能显著减少比较次数，效率高于朴素的字符串匹配算法。</li>
+</ul>
+]]></content>
+      <categories>
+        <category>数据结构与算法</category>
+      </categories>
+      <tags>
+        <tag>数据结构</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>LeetCode0238</title>
     <url>/2023/11/22/LeetCode0238/</url>
     <content><![CDATA[<h1 id="除自身以外数组的乘积"><a href="#除自身以外数组的乘积" class="headerlink" title="除自身以外数组的乘积"></a><a href="https://leetcode.cn/problems/product-of-array-except-self/">除自身以外数组的乘积</a></h1><h2 id="题目描述"><a href="#题目描述" class="headerlink" title="题目描述"></a>题目描述</h2><p>给你一个整数数组 <code>nums</code>，返回 <em>数组 <code>answer</code> ，其中 <code>answer[i]</code> 等于 <code>nums</code> 中除 <code>nums[i]</code> 之外其余各元素的乘积</em> 。</p>
@@ -404,45 +404,6 @@
       </categories>
       <tags>
         <tag>二维数组</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>LeetCode0724</title>
-    <url>/2023/11/20/LeetCode0724/</url>
-    <content><![CDATA[<h1 id="寻找数组的中心下标"><a href="#寻找数组的中心下标" class="headerlink" title="寻找数组的中心下标"></a><a href="https://leetcode.cn/problems/find-pivot-index/">寻找数组的中心下标</a></h1><hr>
-<h2 id="题目描述"><a href="#题目描述" class="headerlink" title="题目描述"></a>题目描述</h2><p>给你一个整数数组 <code>nums</code> ，请计算数组的 <strong>中心下标</strong> 。</p>
-<p>数组 <strong>中心下标</strong> 是数组的一个下标，其左侧所有元素相加的和等于右侧所有元素相加的和。</p>
-<p>如果中心下标位于数组最左端，那么左侧数之和视为 <code>0</code> ，因为在下标的左侧不存在元素。这一点对于中心下标位于数组最右端同样适用。</p>
-<p>如果数组有多个中心下标，应该返回 <strong>最靠近左边</strong> 的那一个。如果数组不存在中心下标，返回 <code>-1</code> 。</p>
-<span id="more"></span>
-<p><strong>示例 1：</strong></p>
-<figure class="highlight tap"><table><tr><td class="code"><pre><span class="line">输入：nums = [1, 7, 3, 6, 5, 6]</span><br><span class="line">输出：3</span><br><span class="line">解释：</span><br><span class="line">中心下标是<span class="number"> 3 </span>。</span><br><span class="line">左侧数之和 sum = nums[0] + nums[1] + nums[2] =<span class="number"> 1 </span>+<span class="number"> 7 </span>+<span class="number"> 3 </span>=<span class="number"> 11 </span>，</span><br><span class="line">右侧数之和 sum = nums[4] + nums[5] =<span class="number"> 5 </span>+<span class="number"> 6 </span>=<span class="number"> 11 </span>，二者相等。</span><br></pre></td></tr></table></figure>
-<p><strong>示例 2：</strong></p>
-<figure class="highlight fix"><table><tr><td class="code"><pre><span class="line"><span class="attr">输入：nums </span>=<span class="string"> [1, 2, 3]</span></span><br><span class="line"><span class="string">输出：-1</span></span><br><span class="line"><span class="string">解释：</span></span><br><span class="line"><span class="string">数组中不存在满足此条件的中心下标。</span></span><br></pre></td></tr></table></figure>
-<p><strong>示例 3：</strong></p>
-<figure class="highlight tap"><table><tr><td class="code"><pre><span class="line">输入：nums = [2, 1, -1]</span><br><span class="line">输出：0</span><br><span class="line">解释：</span><br><span class="line">中心下标是<span class="number"> 0 </span>。</span><br><span class="line">左侧数之和 sum =<span class="number"> 0 </span>，（下标<span class="number"> 0 </span>左侧不存在元素），</span><br><span class="line">右侧数之和 sum = nums[1] + nums[2] =<span class="number"> 1 </span>+ -1 =<span class="number"> 0 </span>。</span><br></pre></td></tr></table></figure>
-<p><strong>提示：</strong></p>
-<ul>
-<li><code>1 &lt;= nums.length &lt;= 104</code></li>
-<li><code>-1000 &lt;= nums[i] &lt;= 1000</code></li>
-</ul>
-<h2 id="思路"><a href="#思路" class="headerlink" title="思路"></a>思路</h2><ul>
-<li>刚开始没什么具体思路，非常脑残地一点点计算出SUM(左右)，代码如下：</li>
-</ul>
-<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="type">int</span> <span class="title function_">pivotIndex</span><span class="params">(<span class="type">int</span>* nums, <span class="type">int</span> numsSize)</span> &#123;</span><br><span class="line">    <span class="type">int</span> sum = <span class="number">0</span>;</span><br><span class="line">    <span class="type">int</span> sum_left = <span class="number">0</span>, sum_right = <span class="number">0</span>;</span><br><span class="line">    <span class="type">int</span> i;</span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; numsSize; i++) &#123;</span><br><span class="line">        sum += nums[i];</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (sum == <span class="number">0</span>)</span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="keyword">for</span> (i = <span class="number">0</span>; i &lt; numsSize; i++) &#123;</span><br><span class="line">            <span class="keyword">for</span> (<span class="type">int</span> j = <span class="number">0</span>; j &lt; i; j++)</span><br><span class="line">                sum_left += nums[j];</span><br><span class="line">            <span class="keyword">for</span> (<span class="type">int</span> p = i + <span class="number">1</span>; p &lt; numsSize; p++)</span><br><span class="line">                sum_right += nums[p];</span><br><span class="line"></span><br><span class="line">            <span class="keyword">if</span> (sum_left == sum_right)</span><br><span class="line">                <span class="keyword">return</span> i;</span><br><span class="line"></span><br><span class="line">            <span class="comment">// 重置 sum_left 和 sum_right</span></span><br><span class="line">            sum_left = <span class="number">0</span>;</span><br><span class="line">            sum_right = <span class="number">0</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p><strong>中间那个重置千万别忘掉</strong></p>
-<ul>
-<li><p>在GPT的帮助下，我把代码重构了一下，主要是针对右侧sum的计算逻辑修改</p>
-<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="type">int</span> <span class="title function_">pivotIndex</span><span class="params">(<span class="type">int</span>* nums, <span class="type">int</span> numsSize)</span> &#123;</span><br><span class="line">    <span class="type">int</span> sum = <span class="number">0</span>;</span><br><span class="line">    <span class="type">int</span> sum_left = <span class="number">0</span>;</span><br><span class="line">    <span class="type">int</span> sum_right;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; numsSize; i++) &#123;</span><br><span class="line">        sum += nums[i];</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; numsSize; i++) &#123;</span><br><span class="line">        sum_right = sum - sum_left - nums[i];</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (sum_left == sum_right) &#123;</span><br><span class="line">            <span class="keyword">return</span> i;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        sum_left += nums[i];</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-<p>这个逻辑中无需先预判[0]元素是否可以直接PASS（其实前一个也不用，写麻烦了），并且用全数列的sum-左sum-当前元素，少了一丢丢运算过程，更加简洁明了</p>
-</li>
-</ul>
-]]></content>
-      <categories>
-        <category>题解</category>
-      </categories>
-      <tags>
-        <tag>数组</tag>
       </tags>
   </entry>
   <entry>
@@ -842,6 +803,45 @@
       </tags>
   </entry>
   <entry>
+    <title>LeetCode0724</title>
+    <url>/2023/11/20/LeetCode0724/</url>
+    <content><![CDATA[<h1 id="寻找数组的中心下标"><a href="#寻找数组的中心下标" class="headerlink" title="寻找数组的中心下标"></a><a href="https://leetcode.cn/problems/find-pivot-index/">寻找数组的中心下标</a></h1><hr>
+<h2 id="题目描述"><a href="#题目描述" class="headerlink" title="题目描述"></a>题目描述</h2><p>给你一个整数数组 <code>nums</code> ，请计算数组的 <strong>中心下标</strong> 。</p>
+<p>数组 <strong>中心下标</strong> 是数组的一个下标，其左侧所有元素相加的和等于右侧所有元素相加的和。</p>
+<p>如果中心下标位于数组最左端，那么左侧数之和视为 <code>0</code> ，因为在下标的左侧不存在元素。这一点对于中心下标位于数组最右端同样适用。</p>
+<p>如果数组有多个中心下标，应该返回 <strong>最靠近左边</strong> 的那一个。如果数组不存在中心下标，返回 <code>-1</code> 。</p>
+<span id="more"></span>
+<p><strong>示例 1：</strong></p>
+<figure class="highlight tap"><table><tr><td class="code"><pre><span class="line">输入：nums = [1, 7, 3, 6, 5, 6]</span><br><span class="line">输出：3</span><br><span class="line">解释：</span><br><span class="line">中心下标是<span class="number"> 3 </span>。</span><br><span class="line">左侧数之和 sum = nums[0] + nums[1] + nums[2] =<span class="number"> 1 </span>+<span class="number"> 7 </span>+<span class="number"> 3 </span>=<span class="number"> 11 </span>，</span><br><span class="line">右侧数之和 sum = nums[4] + nums[5] =<span class="number"> 5 </span>+<span class="number"> 6 </span>=<span class="number"> 11 </span>，二者相等。</span><br></pre></td></tr></table></figure>
+<p><strong>示例 2：</strong></p>
+<figure class="highlight fix"><table><tr><td class="code"><pre><span class="line"><span class="attr">输入：nums </span>=<span class="string"> [1, 2, 3]</span></span><br><span class="line"><span class="string">输出：-1</span></span><br><span class="line"><span class="string">解释：</span></span><br><span class="line"><span class="string">数组中不存在满足此条件的中心下标。</span></span><br></pre></td></tr></table></figure>
+<p><strong>示例 3：</strong></p>
+<figure class="highlight tap"><table><tr><td class="code"><pre><span class="line">输入：nums = [2, 1, -1]</span><br><span class="line">输出：0</span><br><span class="line">解释：</span><br><span class="line">中心下标是<span class="number"> 0 </span>。</span><br><span class="line">左侧数之和 sum =<span class="number"> 0 </span>，（下标<span class="number"> 0 </span>左侧不存在元素），</span><br><span class="line">右侧数之和 sum = nums[1] + nums[2] =<span class="number"> 1 </span>+ -1 =<span class="number"> 0 </span>。</span><br></pre></td></tr></table></figure>
+<p><strong>提示：</strong></p>
+<ul>
+<li><code>1 &lt;= nums.length &lt;= 104</code></li>
+<li><code>-1000 &lt;= nums[i] &lt;= 1000</code></li>
+</ul>
+<h2 id="思路"><a href="#思路" class="headerlink" title="思路"></a>思路</h2><ul>
+<li>刚开始没什么具体思路，非常脑残地一点点计算出SUM(左右)，代码如下：</li>
+</ul>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="type">int</span> <span class="title function_">pivotIndex</span><span class="params">(<span class="type">int</span>* nums, <span class="type">int</span> numsSize)</span> &#123;</span><br><span class="line">    <span class="type">int</span> sum = <span class="number">0</span>;</span><br><span class="line">    <span class="type">int</span> sum_left = <span class="number">0</span>, sum_right = <span class="number">0</span>;</span><br><span class="line">    <span class="type">int</span> i;</span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; numsSize; i++) &#123;</span><br><span class="line">        sum += nums[i];</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (sum == <span class="number">0</span>)</span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="keyword">for</span> (i = <span class="number">0</span>; i &lt; numsSize; i++) &#123;</span><br><span class="line">            <span class="keyword">for</span> (<span class="type">int</span> j = <span class="number">0</span>; j &lt; i; j++)</span><br><span class="line">                sum_left += nums[j];</span><br><span class="line">            <span class="keyword">for</span> (<span class="type">int</span> p = i + <span class="number">1</span>; p &lt; numsSize; p++)</span><br><span class="line">                sum_right += nums[p];</span><br><span class="line"></span><br><span class="line">            <span class="keyword">if</span> (sum_left == sum_right)</span><br><span class="line">                <span class="keyword">return</span> i;</span><br><span class="line"></span><br><span class="line">            <span class="comment">// 重置 sum_left 和 sum_right</span></span><br><span class="line">            sum_left = <span class="number">0</span>;</span><br><span class="line">            sum_right = <span class="number">0</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><strong>中间那个重置千万别忘掉</strong></p>
+<ul>
+<li><p>在GPT的帮助下，我把代码重构了一下，主要是针对右侧sum的计算逻辑修改</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="type">int</span> <span class="title function_">pivotIndex</span><span class="params">(<span class="type">int</span>* nums, <span class="type">int</span> numsSize)</span> &#123;</span><br><span class="line">    <span class="type">int</span> sum = <span class="number">0</span>;</span><br><span class="line">    <span class="type">int</span> sum_left = <span class="number">0</span>;</span><br><span class="line">    <span class="type">int</span> sum_right;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; numsSize; i++) &#123;</span><br><span class="line">        sum += nums[i];</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; numsSize; i++) &#123;</span><br><span class="line">        sum_right = sum - sum_left - nums[i];</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (sum_left == sum_right) &#123;</span><br><span class="line">            <span class="keyword">return</span> i;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        sum_left += nums[i];</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>这个逻辑中无需先预判[0]元素是否可以直接PASS（其实前一个也不用，写麻烦了），并且用全数列的sum-左sum-当前元素，少了一丢丢运算过程，更加简洁明了</p>
+</li>
+</ul>
+]]></content>
+      <categories>
+        <category>题解</category>
+      </categories>
+      <tags>
+        <tag>数组</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>ROS1初步</title>
     <url>/2024/03/11/ROS1%E5%88%9D%E6%AD%A5/</url>
     <content><![CDATA[<p><a name="J4y9t"></a></p>
@@ -904,18 +904,6 @@
       </categories>
       <tags>
         <tag>ROS</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Self-balancing-bycycle</title>
-    <url>/2023/10/09/Self-balancing-bycycle/</url>
-    <content><![CDATA[<p><em>项目简介：由于这是我负责的项目，仅以此篇博客用于记录项目的研究方向，思路，进度等。</em><br>未完待续。。。<br><span id="more"></span></p>
-]]></content>
-      <categories>
-        <category>项目</category>
-      </categories>
-      <tags>
-        <tag>平衡车</tag>
       </tags>
   </entry>
   <entry>
@@ -1315,60 +1303,66 @@ PE_{(pos, 2i)} = \sin \left( \frac{pos}{10000^{2i/d}} \right), \quad PE_{(pos, 2
       </tags>
   </entry>
   <entry>
-    <title>screen命令应用</title>
-    <url>/2024/09/18/screen%E5%91%BD%E4%BB%A4%E5%BA%94%E7%94%A8/</url>
-    <content><![CDATA[<p><code>screen</code> 是一个非常强大的终端会话管理工具，它可以让你在多个终端窗口中运行任务，并在会话断开后继续保持任务的执行状态。特别适合长时间运行的任务或远程连接的任务管理。<br>对于远程服务器player简直是屠龙宝刀。</p>
-<h3 id="常见用法："><a href="#常见用法：" class="headerlink" title="常见用法："></a>常见用法：</h3><p>以下是一些常见的 <code>screen</code> 命令和用法：</p>
-<h4 id="1-启动新的-screen-会话"><a href="#1-启动新的-screen-会话" class="headerlink" title="1. 启动新的 screen 会话"></a>1. <strong>启动新的 <code>screen</code> 会话</strong></h4><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">screen</span><br></pre></td></tr></table></figure>
-<ul>
-<li>启动一个新的 <code>screen</code> 会话。在新窗口中，你可以运行任何命令。</li>
-<li>默认情况下，<code>screen</code> 会自动分配一个会话 ID。</li>
-</ul>
-<h4 id="2-启动带名称的-screen-会话"><a href="#2-启动带名称的-screen-会话" class="headerlink" title="2. 启动带名称的 screen 会话"></a>2. <strong>启动带名称的 <code>screen</code> 会话</strong></h4><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">screen -S session_name</span><br></pre></td></tr></table></figure>
-<ul>
-<li>通过 <code>-S</code> 选项为会话指定名称 <code>session_name</code>，便于管理多个会话。</li>
-</ul>
-<h4 id="3-分离（Detach）会话"><a href="#3-分离（Detach）会话" class="headerlink" title="3. 分离（Detach）会话"></a>3. <strong>分离（Detach）会话</strong></h4><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">Ctrl + A + D</span><br></pre></td></tr></table></figure>
-<ul>
-<li>使用快捷键 <code>Ctrl + A + D</code>，可以将当前会话暂时分离（detach），但命令仍会继续在后台执行。</li>
-</ul>
-<h4 id="4-恢复（Reattach）已分离的会话"><a href="#4-恢复（Reattach）已分离的会话" class="headerlink" title="4. 恢复（Reattach）已分离的会话"></a>4. <strong>恢复（Reattach）已分离的会话</strong></h4><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">screen -r</span><br></pre></td></tr></table></figure>
-<ul>
-<li>恢复上一个分离的 <code>screen</code> 会话。</li>
-</ul>
-<h4 id="5-查看现有-screen-会话"><a href="#5-查看现有-screen-会话" class="headerlink" title="5. 查看现有 screen 会话"></a>5. <strong>查看现有 <code>screen</code> 会话</strong></h4><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">screen -<span class="built_in">ls</span></span><br></pre></td></tr></table></figure>
-<ul>
-<li>列出当前所有的 <code>screen</code> 会话，包括那些分离的会话。例如：<figure class="highlight stylus"><table><tr><td class="code"><pre><span class="line">There are screens on:</span><br><span class="line">    <span class="number">1234</span><span class="selector-class">.session_name</span>    (Detached)</span><br><span class="line">    <span class="number">5678</span><span class="selector-class">.pts-0</span><span class="selector-class">.hostname</span>  (Attached)</span><br></pre></td></tr></table></figure>
-</li>
-</ul>
-<h4 id="6-恢复指定的会话"><a href="#6-恢复指定的会话" class="headerlink" title="6. 恢复指定的会话"></a>6. <strong>恢复指定的会话</strong></h4><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">screen -r session_name</span><br></pre></td></tr></table></figure>
-<ul>
-<li>恢复名为 <code>session_name</code> 的会话。你可以通过 <code>screen -ls</code> 查看到所有会话名称。</li>
-</ul>
-<h4 id="7-杀掉-screen-会话"><a href="#7-杀掉-screen-会话" class="headerlink" title="7. 杀掉 screen 会话"></a>7. <strong>杀掉 <code>screen</code> 会话</strong></h4><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">screen -X -S session_name quit</span><br></pre></td></tr></table></figure>
-<ul>
-<li><code>-S session_name</code> 指定会话名，<code>-X quit</code> 用于杀掉该会话。</li>
-</ul>
-<h4 id="8-在会话中分屏操作"><a href="#8-在会话中分屏操作" class="headerlink" title="8. 在会话中分屏操作"></a>8. <strong>在会话中分屏操作</strong></h4><ul>
-<li><p><strong>水平分屏：</strong></p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">Ctrl + A + S</span><br></pre></td></tr></table></figure>
-<p>然后使用 <code>Ctrl + A + Tab</code> 来在不同的屏幕之间切换。</p>
-</li>
-<li><p><strong>垂直分屏：</strong></p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">Ctrl + A + |  <span class="comment"># 使用 | 进行垂直分屏</span></span><br></pre></td></tr></table></figure>
-</li>
-<li><p><strong>关闭分屏：</strong><br>将光标聚焦到需要关闭的分屏窗口中，使用命令：</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">Ctrl + A + X</span><br></pre></td></tr></table></figure>
-</li>
-</ul>
-<h4 id="9-退出-screen-会话"><a href="#9-退出-screen-会话" class="headerlink" title="9. 退出 screen 会话"></a>9. <strong>退出 <code>screen</code> 会话</strong></h4><p>在会话窗口中直接输入 <code>exit</code>，或在分屏中通过 <code>Ctrl + A + X</code> 来关闭。</p>
-<hr>
+    <title>Self-balancing-bycycle</title>
+    <url>/2023/10/09/Self-balancing-bycycle/</url>
+    <content><![CDATA[<p><em>项目简介：由于这是我负责的项目，仅以此篇博客用于记录项目的研究方向，思路，进度等。</em><br>未完待续。。。<br><span id="more"></span></p>
 ]]></content>
       <categories>
-        <category>科研</category>
+        <category>项目</category>
       </categories>
       <tags>
-        <tag>命令</tag>
+        <tag>平衡车</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>vim从入门到入土</title>
+    <url>/2024/10/15/vim%E4%BB%8E%E5%85%A5%E9%97%A8%E5%88%B0%E5%85%A5%E5%9C%9F/</url>
+    <content><![CDATA[<p>首先声明我的vscode坚定拥护者身份，奈何十年老古董实在带不动，不得不重新捡起vim开始朴素（装逼）生活。<br><span id="more"></span></p>
+<h2 id="1-什么是-Vim？"><a href="#1-什么是-Vim？" class="headerlink" title="1. 什么是 Vim？"></a>1. 什么是 Vim？</h2><p>Vim 是一个强大的文本编辑器，基于经典的 vi 编辑器。它的核心设计理念是高效编辑文本，特别适合程序员和技术用户 <strong>(高逼格用户)</strong>。</p>
+<p>与大多数文本编辑器不同，Vim 的操作基于模式切换，它拥有多个操作模式，使你能够在插入、编辑、命令等操作之间快速切换。</p>
+<p><strong><em>Vim vs Vi：Vim 是 vi 的增强版，提供了更多的功能，如多级撤销、语法高亮、扩展的脚本支持等。</em></strong></p>
+<h2 id="2-Vim-的主要模式"><a href="#2-Vim-的主要模式" class="headerlink" title="2. Vim 的主要模式"></a>2. Vim 的主要模式</h2><p>Vim 的操作基于不同的模式，主要有以下几种模式：<br><strong>1.普通模式 (Normal Mode)：</strong><br><figure class="highlight css"><table><tr><td class="code"><pre><span class="line">默认进入的模式，用于导航和操作文本。</span><br><span class="line">进入方式：启动 Vim 后默认进入，或按 Esc 回到普通模式。</span><br><span class="line">常用命令：</span><br><span class="line">h：向左移动光标。</span><br><span class="line">j：向下移动光标。</span><br><span class="line">k：向上移动光标。</span><br><span class="line">l：向右移动光标。</span><br><span class="line"><span class="selector-tag">dd</span>：删除当前行。</span><br><span class="line">yy：复制当前行。</span><br><span class="line"><span class="selector-tag">p</span>：在光标之后粘贴。</span><br></pre></td></tr></table></figure><br><strong>2.插入模式 (Insert Mode)：</strong><br><figure class="highlight css"><table><tr><td class="code"><pre><span class="line">用于编辑文本，类似于普通文本编辑器的输入状态。</span><br><span class="line">进入方式：按 <span class="selector-tag">i</span> 或 <span class="selector-tag">a</span> 进入。</span><br><span class="line">退出方式：按 Esc 退出插入模式，回到普通模式。</span><br></pre></td></tr></table></figure><br><strong>3.可视模式 (Visual Mode)：</strong></p>
+<figure class="highlight css"><table><tr><td class="code"><pre><span class="line">用于选择文本块。</span><br><span class="line">进入方式：按 v 进入。</span><br><span class="line">常用操作：</span><br><span class="line">y：复制选中的文本。</span><br><span class="line">d：删除选中的文本。</span><br><span class="line"><span class="selector-tag">p</span>：粘贴选中的文本。</span><br></pre></td></tr></table></figure>
+<p><strong>4.命令行模式 (Command-Line Mode)：</strong></p>
+<figure class="highlight elixir"><table><tr><td class="code"><pre><span class="line">用于执行命令，如保存、退出、查找等。</span><br><span class="line">进入方式：按 : 进入。</span><br><span class="line">常用命令：</span><br><span class="line"><span class="symbol">:w</span>：保存文件。</span><br><span class="line"><span class="symbol">:q</span>：退出文件。</span><br><span class="line"><span class="symbol">:wq</span>：保存并退出。</span><br><span class="line"><span class="symbol">:q!</span>：强制退出（不保存修改）。</span><br></pre></td></tr></table></figure>
+<h2 id="3-基本操作指南"><a href="#3-基本操作指南" class="headerlink" title="3. 基本操作指南"></a>3. 基本操作指南</h2><h3 id="3-1-移动光标"><a href="#3-1-移动光标" class="headerlink" title="3.1 移动光标"></a>3.1 移动光标</h3><p>Vim 的基本光标移动是基于 h、j、k、l 四个键，可以用来代替方向键。此外，Vim 提供了更多强大的导航功能：</p>
+<pre><code>w：跳转到下一个单词的开头。
+b：跳转到上一个单词的开头。
+gg：跳转到文件开头。
+G：跳转到文件末尾。
+Ctrl + f：向下翻页。
+Ctrl + b：向上翻页。
+</code></pre><h3 id="3-2-插入和编辑文本"><a href="#3-2-插入和编辑文本" class="headerlink" title="3.2 插入和编辑文本"></a>3.2 插入和编辑文本</h3><p>在普通模式下，通过按以下键进入插入模式以编辑文本：</p>
+<pre><code>i：在光标前插入文本。
+I：在当前行的行首插入文本。
+a：在光标后插入文本。
+A：在当前行的行尾插入文本。
+o：在光标下方新建一行并插入。
+O：在光标上方新建一行并插入。
+</code></pre><h3 id="3-3-删除文本"><a href="#3-3-删除文本" class="headerlink" title="3.3 删除文本"></a>3.3 删除文本</h3><figure class="highlight x86asm"><table><tr><td class="code"><pre><span class="line">x：删除光标所在的字符。</span><br><span class="line"><span class="built_in">dd</span>：删除当前行。</span><br><span class="line">d + 移动命令：根据移动命令删除内容，例如 <span class="built_in">dw</span> 删除到下一个单词开头，d$ 删除到行尾。</span><br></pre></td></tr></table></figure>
+<h3 id="3-4-复制和粘贴"><a href="#3-4-复制和粘贴" class="headerlink" title="3.4 复制和粘贴"></a>3.4 复制和粘贴</h3><figure class="highlight css"><table><tr><td class="code"><pre><span class="line">yy：复制当前行。</span><br><span class="line">y + 移动命令：复制指定范围的内容，例如 yw 复制到下一个单词开头。</span><br><span class="line"><span class="selector-tag">p</span>：在光标后粘贴内容。</span><br><span class="line"><span class="selector-tag">P</span>：在光标前粘贴内容。</span><br></pre></td></tr></table></figure>
+<h3 id="3-5-撤销和重做"><a href="#3-5-撤销和重做" class="headerlink" title="3.5 撤销和重做"></a>3.5 撤销和重做</h3><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">u：撤销上一步操作。</span><br><span class="line">Ctrl + <span class="built_in">r</span>：重做撤销的操作。</span><br></pre></td></tr></table></figure>
+<h2 id="4-Vim-高级操作"><a href="#4-Vim-高级操作" class="headerlink" title="4. Vim 高级操作"></a>4. Vim 高级操作</h2><h3 id="4-1-查找和替换"><a href="#4-1-查找和替换" class="headerlink" title="4.1 查找和替换"></a>4.1 查找和替换</h3><p>Vim 提供了强大的查找和替换功能：<br><figure class="highlight ruby"><table><tr><td class="code"><pre><span class="line">/pattern：向前查找 pattern。</span><br><span class="line"><span class="string">?p</span>attern：向后查找 pattern。</span><br><span class="line">n：跳转到下一个匹配项。</span><br><span class="line">N：跳转到上一个匹配项。</span><br><span class="line"><span class="symbol">:s/old/new/g</span>：将当前行中的 old 替换为 new。</span><br><span class="line"><span class="symbol">:%s/old/new/g</span>：将整个文件中的 old 替换为 new。</span><br></pre></td></tr></table></figure></p>
+<h3 id="4-2-多文件和窗口操作"><a href="#4-2-多文件和窗口操作" class="headerlink" title="4.2 多文件和窗口操作"></a>4.2 多文件和窗口操作</h3><figure class="highlight elixir"><table><tr><td class="code"><pre><span class="line"><span class="symbol">:e</span> filename：打开一个新文件。</span><br><span class="line"><span class="symbol">:vsp</span> filename：垂直分屏打开文件。</span><br><span class="line"><span class="symbol">:sp</span> filename：水平分屏打开文件。</span><br><span class="line"><span class="title class_">Ctrl</span> + w + h/j/k/l：在不同窗口间切换。</span><br></pre></td></tr></table></figure>
+<h3 id="4-3-宏录制与回放"><a href="#4-3-宏录制与回放" class="headerlink" title="4.3 宏录制与回放"></a>4.3 宏录制与回放</h3><p>Vim 支持录制操作的宏，可以将常用操作记录下来并反复执行：<br><figure class="highlight less"><table><tr><td class="code"><pre><span class="line"><span class="selector-tag">q</span> + 字母：开始录制宏到指定的字母键（如 <span class="selector-tag">q</span> <span class="selector-tag">a</span> 开始录制到 <span class="selector-tag">a</span>）。</span><br><span class="line">执行所需操作。</span><br><span class="line"><span class="selector-tag">q</span>：停止录制。</span><br><span class="line">@<span class="selector-tag">a</span>：回放录制的宏 <span class="selector-tag">a</span>。</span><br></pre></td></tr></table></figure></p>
+<h2 id="5-Vim-的配置"><a href="#5-Vim-的配置" class="headerlink" title="5. Vim 的配置"></a>5. Vim 的配置</h2><p>Vim 可以通过编辑 .vimrc 文件进行自定义，这个文件通常位于用户的主目录下。通过编辑 .vimrc，你可以为 Vim 添加一些个性化的配置，以提高编辑效率。以下是一些常用配置选项：<br><figure class="highlight vim"><table><tr><td class="code"><pre><span class="line"><span class="keyword">set</span> <span class="keyword">number</span>        <span class="comment">&quot; 显示行号</span></span><br><span class="line"><span class="keyword">set</span> tabstop=<span class="number">4</span>     <span class="comment">&quot; 设置 Tab 键宽度为 4 个空格</span></span><br><span class="line"><span class="keyword">set</span> <span class="built_in">shiftwidth</span>=<span class="number">4</span>  <span class="comment">&quot; 设置自动缩进为 4 个空格</span></span><br><span class="line"><span class="keyword">set</span> expandtab     <span class="comment">&quot; 将 Tab 转换为空格</span></span><br><span class="line"><span class="keyword">set</span> cursorline    <span class="comment">&quot; 高亮当前行</span></span><br><span class="line"><span class="keyword">syntax</span> <span class="keyword">on</span>         <span class="comment">&quot; 启用语法高亮</span></span><br><span class="line"><span class="keyword">set</span> relativenumber <span class="comment">&quot; 显示相对行号</span></span><br></pre></td></tr></table></figure></p>
+<h2 id="6-常用-Vim-插件"><a href="#6-常用-Vim-插件" class="headerlink" title="6. 常用 Vim 插件"></a>6. 常用 Vim 插件</h2><p>Vim 的强大之处还在于其插件支持，可以通过插件扩展其功能。以下是一些常用的 Vim 插件：</p>
+<ol>
+<li>NerdTree：文件浏览器插件，允许你在 Vim 中以树状结构浏览文件。</li>
+<li>Vim-Airline：美化状态栏，提供更丰富的状态信息。</li>
+<li>Fzf：强大的文件搜索工具，能够快速定位和打开文件。</li>
+<li>YouCompleteMe：代码自动补全插件，支持多种编程语言的补全。</li>
+<li>Syntastic：语法检查工具，能够帮助你及时发现代码中的错误。</li>
+</ol>
+<p>可以通过 Vim 的插件管理工具（如 Vundle 或 Pathogen）来安装和管理这些插件。</p>
+<h2 id="7-如何退出-Vim"><a href="#7-如何退出-Vim" class="headerlink" title="7. 如何退出 Vim"></a>7. 如何退出 Vim</h2><p>退出 Vim 是初学者经常遇到的问题。以下是几种退出方式：<br><figure class="highlight elixir"><table><tr><td class="code"><pre><span class="line"><span class="symbol">:q</span>：退出（无修改时）。</span><br><span class="line"><span class="symbol">:wq</span> 或 <span class="title class_">ZZ</span>：保存并退出。</span><br><span class="line"><span class="symbol">:q!</span>：强制退出（不保存修改）。</span><br><span class="line"><span class="symbol">:wq!</span>：强制保存并退出。</span><br></pre></td></tr></table></figure></p>
+<p>掌握了这些内容基本就足够在服务器终端上大展身手了，网上有很多大佬开发了各种各样的vim插件（说实话vim的最终解就是vscode），以后可能会继续更新这些插件配置相关内容</p>
+]]></content>
+      <categories>
+        <category>工具</category>
+      </categories>
+      <tags>
+        <tag>vim</tag>
       </tags>
   </entry>
   <entry>
@@ -1519,21 +1513,60 @@ PE_{(pos, 2i)} = \sin \left( \frac{pos}{10000^{2i/d}} \right), \quad PE_{(pos, 2
       </tags>
   </entry>
   <entry>
-    <title>凯撒密码</title>
-    <url>/2023/11/22/%E5%87%AF%E6%92%92%E5%AF%86%E7%A0%81/</url>
-    <content><![CDATA[<h3 id="题目描述"><a href="#题目描述" class="headerlink" title="题目描述"></a>题目描述</h3><p>凯撒加密算法Caesar<br>    在密码学中，凯撒密码（英语：Caesar cipher），或称凯撒加密、凯撒变换、变换加密，是一种最简单且最广为人知的加密技术。它是一种替换加密的技术，明文中的所有字母都在字母表上向后（或向前）按照一个固定数目进行偏移后被替换成密文。例如，当偏移量是3的时候，所有的字母A将被替换成D，B变成E，以此类推。这个加密方法是以罗马共和时期恺撒的名字命名的，当年恺撒曾用此方法与其将军们进行联系。</p>
-<span id="more"></span>
-<p>​    凯撒密码的替换方法是通过排列明文和密文字母表，密文字母表示通过将明文字母表向左或向右移动一个固定数目的位置。例如，当偏移量是左移3的时候（解密时的密钥就是3）：<br>明文字母表：ABCDEFGHIJKLMNOPQRSTUVWXYZ<br>密文字母表：DEFGHIJKLMNOPQRSTUVWXYZABC</p>
-<p>​    当偏移量是3的时候，所有的字母A将被替换成D，B变成E，以此类推。<br>​    使用时，加密者查找明文字母表中需要加密的消息中的每一个字母所在位置，并且写下密文字母表中对应的字母。需要解密的人则根据事先已知的密钥反过来操作，得到原来的明文。例如：<br>明文：THE QUICK BROWN FOX JUMPS OVER THE LAZY DOG<br>密文：WKH TXLFN EURZQ IRA MXPSV RYHU WKH ODCB GRJ<br>​    加密系统使用的秘诀是发送方和接收方需要知道加密用的偏移量，这个加密算法虽然现在看来特别容易破解，但是它刚开始使用的时候还是很安全的。<br>​    未加密的文字称为明文plaintext. 加密后的文字称为密文ciphertext. 偏移的位置称为钥匙 key.<br>例如用钥匙1 加密HELLO 产生密文IFMMP:<br>​    plaintext    H    E    L    L    O</p>
-<p>​    key    1    1    1    1    1<br>​    = ciphertext    I    F    M    M    P<br>​    如果p是明文, pi 是p中第 ith 个 字符, k是密码（正整数）,那么密文c中第i个字符 ci,的计算公式如下：<br>ci = (pi + k) % 26<br>​    你可以把A看作一个数组的第一个元素 (下标是0), B 的下标是 1, …, Z 的下标就是25. 假设明文p是Hi ,密钥 k 是 3. p0 是 H (aka 7), 下一个字符 p1, 是 i (aka 8). 密文的第一个字符c0, 是 K, 第二个字符 c1是 L.<br>​    请写程序 Caesar.c 其功能是用 Caesar 加密算法给信息加密.用户输入的钥匙可能不是正整数，这时我们要求要求用户必须输入正整数作为密钥.<br>程序的运行如下例。密钥是1 ，明文是HELLO:<br>​    plaintext:  HELLO<br>​    ciphertext: IFMMP<br>​    明文是 hello, world，密钥是13时运行输入:<br>​    plaintext:  hello, world<br>​    ciphertext: uryyb, jbeyq<br>注意：标点符号和空格不加密，只有文本加密! 小写字母保持小写，大写字母保持大写。<br>部分代码已经给出，请将to-list 中的5的任务完成，就可以实现以上任务。</p>
-<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;string.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;windows.h&gt;</span></span></span><br><span class="line"><span class="comment">// 清空输入缓冲区</span></span><br><span class="line"><span class="type">void</span> <span class="title function_">flushInputBuffer</span><span class="params">()</span> &#123;</span><br><span class="line">    <span class="type">int</span> c;</span><br><span class="line">    <span class="keyword">while</span> ((c = getchar()) != <span class="string">&#x27;\n&#x27;</span> &amp;&amp; c != EOF);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 获取加密密钥</span></span><br><span class="line"><span class="type">int</span> <span class="title function_">get_key</span><span class="params">()</span> &#123;</span><br><span class="line">    <span class="type">int</span> key;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;输入加密密钥（正整数）: &quot;</span>);</span><br><span class="line">    <span class="built_in">scanf</span>(<span class="string">&quot;%d&quot;</span>, &amp;key);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 处理密钥的非正整数输入</span></span><br><span class="line">    <span class="keyword">while</span> (key &lt;= <span class="number">0</span>) &#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;请输入正整数作为加密密钥: &quot;</span>);</span><br><span class="line">        <span class="built_in">scanf</span>(<span class="string">&quot;%d&quot;</span>, &amp;key);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> key;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 加密和解密函数</span></span><br><span class="line"><span class="type">void</span> <span class="title function_">change</span><span class="params">(<span class="type">char</span> p[], <span class="type">char</span> c[], <span class="type">int</span> len, <span class="type">int</span> key)</span> &#123;</span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; len; i++) &#123;</span><br><span class="line">        <span class="keyword">if</span> (p[i] &gt;= <span class="string">&#x27;A&#x27;</span> &amp;&amp; p[i] &lt;= <span class="string">&#x27;Z&#x27;</span>) &#123;</span><br><span class="line">            c[i] = <span class="string">&#x27;A&#x27;</span> + (p[i] - <span class="string">&#x27;A&#x27;</span> + key) % <span class="number">26</span>; <span class="comment">// 加密大写字母</span></span><br><span class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span> (p[i] &gt;= <span class="string">&#x27;a&#x27;</span> &amp;&amp; p[i] &lt;= <span class="string">&#x27;z&#x27;</span>) &#123;</span><br><span class="line">            c[i] = <span class="string">&#x27;a&#x27;</span> + (p[i] - <span class="string">&#x27;a&#x27;</span> + key) % <span class="number">26</span>; <span class="comment">// 加密小写字母</span></span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            c[i] = p[i]; <span class="comment">// 保留非字母字符</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    c[len] = <span class="string">&#x27;\0&#x27;</span>; <span class="comment">// 在密文字符串的末尾添加空字符</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 检查解密后的文本是否与原始文本匹配</span></span><br><span class="line"><span class="type">void</span> <span class="title function_">check</span><span class="params">(<span class="type">char</span> p[], <span class="type">char</span> origin[])</span> &#123;</span><br><span class="line">    <span class="keyword">if</span> (<span class="built_in">strcmp</span>(p, origin) == <span class="number">0</span>) &#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;加密正确。\n&quot;</span>);</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;加密不正确。\n&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span> &#123;</span><br><span class="line">    system(<span class="string">&quot;chcp 65001&quot;</span>);</span><br><span class="line">    <span class="type">int</span> key = get_key();</span><br><span class="line">    <span class="type">char</span> p[<span class="number">100</span>], c[<span class="number">100</span>];</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 获取输入</span></span><br><span class="line">    flushInputBuffer();</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;请输入明文:&quot;</span>);</span><br><span class="line">    fgets(p, <span class="keyword">sizeof</span>(p), <span class="built_in">stdin</span>);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 处理输入的换行符</span></span><br><span class="line">    <span class="type">int</span> len = <span class="built_in">strlen</span>(p);</span><br><span class="line">    <span class="keyword">if</span> (p[len - <span class="number">1</span>] == <span class="string">&#x27;\n&#x27;</span>) &#123;</span><br><span class="line">        p[len - <span class="number">1</span>] = <span class="string">&#x27;\0&#x27;</span>;</span><br><span class="line">        len--;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 加密</span></span><br><span class="line">    change(p, c, len, key);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 显示加密后的结果</span></span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;密文是: %s&quot;</span>, c);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 解密</span></span><br><span class="line">    <span class="type">char</span> origin[<span class="number">100</span>];</span><br><span class="line">    change(c, origin, len, <span class="number">26</span> - key);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 显示解密后的结果</span></span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;原始文本是:\n%s\n&quot;</span>, origin);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 检查加密是否正确</span></span><br><span class="line">    check(p, origin);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p><strong>屎山——不倒就是山，倒了才是屎</strong></p>
+    <title>screen命令应用</title>
+    <url>/2024/09/18/screen%E5%91%BD%E4%BB%A4%E5%BA%94%E7%94%A8/</url>
+    <content><![CDATA[<p><code>screen</code> 是一个非常强大的终端会话管理工具，它可以让你在多个终端窗口中运行任务，并在会话断开后继续保持任务的执行状态。特别适合长时间运行的任务或远程连接的任务管理。<br>对于远程服务器player简直是屠龙宝刀。</p>
+<h3 id="常见用法："><a href="#常见用法：" class="headerlink" title="常见用法："></a>常见用法：</h3><p>以下是一些常见的 <code>screen</code> 命令和用法：</p>
+<h4 id="1-启动新的-screen-会话"><a href="#1-启动新的-screen-会话" class="headerlink" title="1. 启动新的 screen 会话"></a>1. <strong>启动新的 <code>screen</code> 会话</strong></h4><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">screen</span><br></pre></td></tr></table></figure>
+<ul>
+<li>启动一个新的 <code>screen</code> 会话。在新窗口中，你可以运行任何命令。</li>
+<li>默认情况下，<code>screen</code> 会自动分配一个会话 ID。</li>
+</ul>
+<h4 id="2-启动带名称的-screen-会话"><a href="#2-启动带名称的-screen-会话" class="headerlink" title="2. 启动带名称的 screen 会话"></a>2. <strong>启动带名称的 <code>screen</code> 会话</strong></h4><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">screen -S session_name</span><br></pre></td></tr></table></figure>
+<ul>
+<li>通过 <code>-S</code> 选项为会话指定名称 <code>session_name</code>，便于管理多个会话。</li>
+</ul>
+<h4 id="3-分离（Detach）会话"><a href="#3-分离（Detach）会话" class="headerlink" title="3. 分离（Detach）会话"></a>3. <strong>分离（Detach）会话</strong></h4><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">Ctrl + A + D</span><br></pre></td></tr></table></figure>
+<ul>
+<li>使用快捷键 <code>Ctrl + A + D</code>，可以将当前会话暂时分离（detach），但命令仍会继续在后台执行。</li>
+</ul>
+<h4 id="4-恢复（Reattach）已分离的会话"><a href="#4-恢复（Reattach）已分离的会话" class="headerlink" title="4. 恢复（Reattach）已分离的会话"></a>4. <strong>恢复（Reattach）已分离的会话</strong></h4><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">screen -r</span><br></pre></td></tr></table></figure>
+<ul>
+<li>恢复上一个分离的 <code>screen</code> 会话。</li>
+</ul>
+<h4 id="5-查看现有-screen-会话"><a href="#5-查看现有-screen-会话" class="headerlink" title="5. 查看现有 screen 会话"></a>5. <strong>查看现有 <code>screen</code> 会话</strong></h4><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">screen -<span class="built_in">ls</span></span><br></pre></td></tr></table></figure>
+<ul>
+<li>列出当前所有的 <code>screen</code> 会话，包括那些分离的会话。例如：<figure class="highlight stylus"><table><tr><td class="code"><pre><span class="line">There are screens on:</span><br><span class="line">    <span class="number">1234</span><span class="selector-class">.session_name</span>    (Detached)</span><br><span class="line">    <span class="number">5678</span><span class="selector-class">.pts-0</span><span class="selector-class">.hostname</span>  (Attached)</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<h4 id="6-恢复指定的会话"><a href="#6-恢复指定的会话" class="headerlink" title="6. 恢复指定的会话"></a>6. <strong>恢复指定的会话</strong></h4><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">screen -r session_name</span><br></pre></td></tr></table></figure>
+<ul>
+<li>恢复名为 <code>session_name</code> 的会话。你可以通过 <code>screen -ls</code> 查看到所有会话名称。</li>
+</ul>
+<h4 id="7-杀掉-screen-会话"><a href="#7-杀掉-screen-会话" class="headerlink" title="7. 杀掉 screen 会话"></a>7. <strong>杀掉 <code>screen</code> 会话</strong></h4><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">screen -X -S session_name quit</span><br></pre></td></tr></table></figure>
+<ul>
+<li><code>-S session_name</code> 指定会话名，<code>-X quit</code> 用于杀掉该会话。</li>
+</ul>
+<h4 id="8-在会话中分屏操作"><a href="#8-在会话中分屏操作" class="headerlink" title="8. 在会话中分屏操作"></a>8. <strong>在会话中分屏操作</strong></h4><ul>
+<li><p><strong>水平分屏：</strong></p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">Ctrl + A + S</span><br></pre></td></tr></table></figure>
+<p>然后使用 <code>Ctrl + A + Tab</code> 来在不同的屏幕之间切换。</p>
+</li>
+<li><p><strong>垂直分屏：</strong></p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">Ctrl + A + |  <span class="comment"># 使用 | 进行垂直分屏</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>关闭分屏：</strong><br>将光标聚焦到需要关闭的分屏窗口中，使用命令：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">Ctrl + A + X</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<h4 id="9-退出-screen-会话"><a href="#9-退出-screen-会话" class="headerlink" title="9. 退出 screen 会话"></a>9. <strong>退出 <code>screen</code> 会话</strong></h4><p>在会话窗口中直接输入 <code>exit</code>，或在分屏中通过 <code>Ctrl + A + X</code> 来关闭。</p>
+<hr>
 ]]></content>
       <categories>
-        <category>屎山</category>
+        <category>科研</category>
       </categories>
       <tags>
-        <tag>数组</tag>
+        <tag>命令</tag>
       </tags>
   </entry>
   <entry>
@@ -1767,6 +1800,24 @@ PE_{(pos, 2i)} = \sin \left( \frac{pos}{10000^{2i/d}} \right), \quad PE_{(pos, 2
       </tags>
   </entry>
   <entry>
+    <title>凯撒密码</title>
+    <url>/2023/11/22/%E5%87%AF%E6%92%92%E5%AF%86%E7%A0%81/</url>
+    <content><![CDATA[<h3 id="题目描述"><a href="#题目描述" class="headerlink" title="题目描述"></a>题目描述</h3><p>凯撒加密算法Caesar<br>    在密码学中，凯撒密码（英语：Caesar cipher），或称凯撒加密、凯撒变换、变换加密，是一种最简单且最广为人知的加密技术。它是一种替换加密的技术，明文中的所有字母都在字母表上向后（或向前）按照一个固定数目进行偏移后被替换成密文。例如，当偏移量是3的时候，所有的字母A将被替换成D，B变成E，以此类推。这个加密方法是以罗马共和时期恺撒的名字命名的，当年恺撒曾用此方法与其将军们进行联系。</p>
+<span id="more"></span>
+<p>​    凯撒密码的替换方法是通过排列明文和密文字母表，密文字母表示通过将明文字母表向左或向右移动一个固定数目的位置。例如，当偏移量是左移3的时候（解密时的密钥就是3）：<br>明文字母表：ABCDEFGHIJKLMNOPQRSTUVWXYZ<br>密文字母表：DEFGHIJKLMNOPQRSTUVWXYZABC</p>
+<p>​    当偏移量是3的时候，所有的字母A将被替换成D，B变成E，以此类推。<br>​    使用时，加密者查找明文字母表中需要加密的消息中的每一个字母所在位置，并且写下密文字母表中对应的字母。需要解密的人则根据事先已知的密钥反过来操作，得到原来的明文。例如：<br>明文：THE QUICK BROWN FOX JUMPS OVER THE LAZY DOG<br>密文：WKH TXLFN EURZQ IRA MXPSV RYHU WKH ODCB GRJ<br>​    加密系统使用的秘诀是发送方和接收方需要知道加密用的偏移量，这个加密算法虽然现在看来特别容易破解，但是它刚开始使用的时候还是很安全的。<br>​    未加密的文字称为明文plaintext. 加密后的文字称为密文ciphertext. 偏移的位置称为钥匙 key.<br>例如用钥匙1 加密HELLO 产生密文IFMMP:<br>​    plaintext    H    E    L    L    O</p>
+<p>​    key    1    1    1    1    1<br>​    = ciphertext    I    F    M    M    P<br>​    如果p是明文, pi 是p中第 ith 个 字符, k是密码（正整数）,那么密文c中第i个字符 ci,的计算公式如下：<br>ci = (pi + k) % 26<br>​    你可以把A看作一个数组的第一个元素 (下标是0), B 的下标是 1, …, Z 的下标就是25. 假设明文p是Hi ,密钥 k 是 3. p0 是 H (aka 7), 下一个字符 p1, 是 i (aka 8). 密文的第一个字符c0, 是 K, 第二个字符 c1是 L.<br>​    请写程序 Caesar.c 其功能是用 Caesar 加密算法给信息加密.用户输入的钥匙可能不是正整数，这时我们要求要求用户必须输入正整数作为密钥.<br>程序的运行如下例。密钥是1 ，明文是HELLO:<br>​    plaintext:  HELLO<br>​    ciphertext: IFMMP<br>​    明文是 hello, world，密钥是13时运行输入:<br>​    plaintext:  hello, world<br>​    ciphertext: uryyb, jbeyq<br>注意：标点符号和空格不加密，只有文本加密! 小写字母保持小写，大写字母保持大写。<br>部分代码已经给出，请将to-list 中的5的任务完成，就可以实现以上任务。</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;string.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;windows.h&gt;</span></span></span><br><span class="line"><span class="comment">// 清空输入缓冲区</span></span><br><span class="line"><span class="type">void</span> <span class="title function_">flushInputBuffer</span><span class="params">()</span> &#123;</span><br><span class="line">    <span class="type">int</span> c;</span><br><span class="line">    <span class="keyword">while</span> ((c = getchar()) != <span class="string">&#x27;\n&#x27;</span> &amp;&amp; c != EOF);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 获取加密密钥</span></span><br><span class="line"><span class="type">int</span> <span class="title function_">get_key</span><span class="params">()</span> &#123;</span><br><span class="line">    <span class="type">int</span> key;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;输入加密密钥（正整数）: &quot;</span>);</span><br><span class="line">    <span class="built_in">scanf</span>(<span class="string">&quot;%d&quot;</span>, &amp;key);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 处理密钥的非正整数输入</span></span><br><span class="line">    <span class="keyword">while</span> (key &lt;= <span class="number">0</span>) &#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;请输入正整数作为加密密钥: &quot;</span>);</span><br><span class="line">        <span class="built_in">scanf</span>(<span class="string">&quot;%d&quot;</span>, &amp;key);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> key;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 加密和解密函数</span></span><br><span class="line"><span class="type">void</span> <span class="title function_">change</span><span class="params">(<span class="type">char</span> p[], <span class="type">char</span> c[], <span class="type">int</span> len, <span class="type">int</span> key)</span> &#123;</span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; len; i++) &#123;</span><br><span class="line">        <span class="keyword">if</span> (p[i] &gt;= <span class="string">&#x27;A&#x27;</span> &amp;&amp; p[i] &lt;= <span class="string">&#x27;Z&#x27;</span>) &#123;</span><br><span class="line">            c[i] = <span class="string">&#x27;A&#x27;</span> + (p[i] - <span class="string">&#x27;A&#x27;</span> + key) % <span class="number">26</span>; <span class="comment">// 加密大写字母</span></span><br><span class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span> (p[i] &gt;= <span class="string">&#x27;a&#x27;</span> &amp;&amp; p[i] &lt;= <span class="string">&#x27;z&#x27;</span>) &#123;</span><br><span class="line">            c[i] = <span class="string">&#x27;a&#x27;</span> + (p[i] - <span class="string">&#x27;a&#x27;</span> + key) % <span class="number">26</span>; <span class="comment">// 加密小写字母</span></span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            c[i] = p[i]; <span class="comment">// 保留非字母字符</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    c[len] = <span class="string">&#x27;\0&#x27;</span>; <span class="comment">// 在密文字符串的末尾添加空字符</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 检查解密后的文本是否与原始文本匹配</span></span><br><span class="line"><span class="type">void</span> <span class="title function_">check</span><span class="params">(<span class="type">char</span> p[], <span class="type">char</span> origin[])</span> &#123;</span><br><span class="line">    <span class="keyword">if</span> (<span class="built_in">strcmp</span>(p, origin) == <span class="number">0</span>) &#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;加密正确。\n&quot;</span>);</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;加密不正确。\n&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span> &#123;</span><br><span class="line">    system(<span class="string">&quot;chcp 65001&quot;</span>);</span><br><span class="line">    <span class="type">int</span> key = get_key();</span><br><span class="line">    <span class="type">char</span> p[<span class="number">100</span>], c[<span class="number">100</span>];</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 获取输入</span></span><br><span class="line">    flushInputBuffer();</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;请输入明文:&quot;</span>);</span><br><span class="line">    fgets(p, <span class="keyword">sizeof</span>(p), <span class="built_in">stdin</span>);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 处理输入的换行符</span></span><br><span class="line">    <span class="type">int</span> len = <span class="built_in">strlen</span>(p);</span><br><span class="line">    <span class="keyword">if</span> (p[len - <span class="number">1</span>] == <span class="string">&#x27;\n&#x27;</span>) &#123;</span><br><span class="line">        p[len - <span class="number">1</span>] = <span class="string">&#x27;\0&#x27;</span>;</span><br><span class="line">        len--;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 加密</span></span><br><span class="line">    change(p, c, len, key);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 显示加密后的结果</span></span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;密文是: %s&quot;</span>, c);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 解密</span></span><br><span class="line">    <span class="type">char</span> origin[<span class="number">100</span>];</span><br><span class="line">    change(c, origin, len, <span class="number">26</span> - key);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 显示解密后的结果</span></span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;原始文本是:\n%s\n&quot;</span>, origin);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 检查加密是否正确</span></span><br><span class="line">    check(p, origin);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><strong>屎山——不倒就是山，倒了才是屎</strong></p>
+]]></content>
+      <categories>
+        <category>屎山</category>
+      </categories>
+      <tags>
+        <tag>数组</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>成绩单</title>
     <url>/2023/12/09/%E6%88%90%E7%BB%A9%E5%8D%95/</url>
     <content><![CDATA[<h1 id="TXT成绩单"><a href="#TXT成绩单" class="headerlink" title="TXT成绩单"></a>TXT成绩单</h1><h2 id="题目描述"><a href="#题目描述" class="headerlink" title="题目描述"></a>题目描述</h2><p><strong>一份班级成绩表存储在一个TXT文件中，每行由学号、姓名、数学成绩、英语成绩、C语言成绩组成，如下：</strong></p>
@@ -1864,125 +1915,6 @@ PE_{(pos, 2i)} = \sin \left( \frac{pos}{10000^{2i/d}} \right), \quad PE_{(pos, 2
       </tags>
   </entry>
   <entry>
-    <title>数据结构的深度思考和总结</title>
-    <url>/2024/10/02/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E7%9A%84%E6%B7%B1%E5%BA%A6%E6%80%9D%E8%80%83%E5%92%8C%E6%80%BB%E7%BB%93/</url>
-    <content><![CDATA[<h4 id="1-数据结构的本质"><a href="#1-数据结构的本质" class="headerlink" title="1.数据结构的本质"></a>1.数据结构的本质</h4><p>数据结构的本质其实就是<strong>链表和数组</strong>，其他复杂的数据结构不过是这些基本结构的高级抽象。无论是树、栈、队列，还是更高级的图结构，归根结底都是基于数组或链表构建的。它们通过底层的实现细节和不同的逻辑组织方式，提供了更易用的API接口。</p>
-<span id="more"></span>
-<p><img src="DataStructure.png" alt="DataStructure"></p>
-<p>比如，<strong>树</strong>这种数据结构，既可以用数组来实现，也可以用链表构建。数组的优势在于可以通过索引快速访问，节省空间，而链表的优势则在于高效的插入和删除操作。但链表由于使用指针，会占用更多的空间。</p>
-<p>我们可以从<strong>Redis</strong>的实现上看到这一点，它内部有字符串、集合等数据结构，每一种数据类型都有不同的实现方式。其实，我们自己也可以根据具体的业务场景，设计并实现出个性化的数据结构，并定义一些适合当前业务需求的API接口。</p>
-<p>语言层面也为我们提供了丰富的数据结构工具。比如在<strong>Python</strong>中，除了常用的字典和列表外，还可以通过<code>collections</code>模块找到一些更灵活和高效的数据类型，如<code>defaultdict</code>、双端队列<code>deque</code>、计数器<code>Counter</code>等。<strong>Java</strong>的<code>java.util</code>包中也包含了大量用于扩展基础数据结构的工具类。</p>
-<p>综上所述，数据结构的底层其实就是<strong>数组和链表</strong>。无论是集合还是字典，都是通过哈希函数来将元素映射到具体的存储位置上。</p>
-<h4 id="那么，算法的本质是什么？"><a href="#那么，算法的本质是什么？" class="headerlink" title="那么，算法的本质是什么？"></a>那么，算法的本质是什么？</h4><p>算法的本质其实就是<strong>穷举</strong>。但穷举并不是那么简单的，它需要做到两点：<strong>不漏</strong>和<strong>聪明的穷举</strong>。</p>
-<p>计算机与人类解决问题的思维方式完全不同。人类可能通过一个公式就能解决问题，而计算机则依赖<strong>计算能力</strong>不断进行尝试，直到得到结果。计算机最大的优点就是速度快、不怕累。因此，算法就是用<strong>计算机语言</strong>把人的问题转化为机器能够执行的程序，通过不断的尝试来解决。</p>
-<h5 id="1-不漏"><a href="#1-不漏" class="headerlink" title="1. 不漏"></a>1. <strong>不漏</strong></h5><p>“不漏”指的是算法给出的解答必须是完整的。比如很多组合问题常用<strong>回溯算法</strong>来解决，算法需要确保所有可能的解都被考虑到，没有遗漏。</p>
-<h5 id="2-聪明的穷举"><a href="#2-聪明的穷举" class="headerlink" title="2. 聪明的穷举"></a>2. <strong>聪明的穷举</strong></h5><p>“聪明的穷举”就是通过优化策略来提高效率。最简单的算法可能是暴力破解，但它通常效率低下。为了提高效率，我们需要进行优化，而所有的优化手段，归根结底都是为了<strong>更聪明地穷举</strong>。</p>
-<p>举个例子，<strong>双指针</strong>和<strong>滑动窗口</strong>技巧就是为了在穷举过程中减少不必要的时间消耗。相比于传统的双重循环，它们能显著提高时间效率。同样的，有时可以选择更合适的数据结构来减少穷举，比如使用双链表代替单链表，可以节省一定的操作步骤。</p>
-<p>在算法设计中，还有一些优化技巧，比如<strong>剪枝</strong>，即在遍历树时提早终止不必要的分支；又比如<strong>记忆化搜索</strong>，通过缓存中间结果来避免重复计算。</p>
-<h2 id="综上所述，数据结构其实就是在说程序存储和读取数据的方法，算法则是在说计算方法不同导致的资源占用和效率不同"><a href="#综上所述，数据结构其实就是在说程序存储和读取数据的方法，算法则是在说计算方法不同导致的资源占用和效率不同" class="headerlink" title="综上所述，数据结构其实就是在说程序存储和读取数据的方法，算法则是在说计算方法不同导致的资源占用和效率不同"></a><strong>综上所述，数据结构其实就是在说程序存储和读取数据的方法，算法则是在说计算方法不同导致的资源占用和效率不同</strong></h2><h4 id="2-线性数据结构"><a href="#2-线性数据结构" class="headerlink" title="2. 线性数据结构"></a>2. <strong>线性数据结构</strong></h4><h5 id="数组-Array"><a href="#数组-Array" class="headerlink" title="数组 (Array)"></a><strong>数组 (Array)</strong></h5><ul>
-<li><strong>定义与特性</strong><br>数组是内存中连续分配的元素集合，支持常数时间的随机访问。<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="type">int</span> arr[<span class="number">5</span>] = &#123;<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>&#125;;  <span class="comment">// 定义一个包含5个整数的数组</span></span><br><span class="line"><span class="type">int</span> element = arr[<span class="number">2</span>];  <span class="comment">// 访问索引为2的元素</span></span><br><span class="line">arr[<span class="number">1</span>] = <span class="number">10</span>;  <span class="comment">// 修改索引为1的元素</span></span><br></pre></td></tr></table></figure></li>
-<li><strong>优缺点分析</strong>  <ul>
-<li>优点：支持常数时间的随机访问，适合查找场景。</li>
-<li>缺点：插入和删除操作需要移动大量元素，效率较低。</li>
-</ul>
-</li>
-<li><strong>典型应用场景与变体</strong>  <ul>
-<li><strong>动态数组</strong>：大小可动态变化的数组，如C++中的<code>std::vector</code>。  </li>
-<li><strong>稀疏矩阵</strong>：存储少量非零元素的矩阵，节省内存。</li>
-</ul>
-</li>
-</ul>
-<h5 id="链表-Linked-List"><a href="#链表-Linked-List" class="headerlink" title="链表 (Linked List)"></a><strong>链表 (Linked List)</strong></h5><ul>
-<li><strong>定义与特性</strong><br>链表是由一系列节点组成的，每个节点包含数据和指向下一个节点的指针。支持高效的插入和删除操作。<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">Node</span> &#123;</span><br><span class="line">    <span class="type">int</span> data;</span><br><span class="line">    Node* next;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">Node* head = <span class="literal">nullptr</span>;  <span class="comment">// 创建一个空链表</span></span><br><span class="line">Node* newNode = <span class="keyword">new</span> Node&#123;<span class="number">10</span>, <span class="literal">nullptr</span>&#125;;  <span class="comment">// 创建一个新节点</span></span><br><span class="line">head = newNode;  <span class="comment">// 将新节点作为链表头部</span></span><br></pre></td></tr></table></figure></li>
-<li><strong>单链表与双链表</strong>  <ul>
-<li><strong>单链表</strong>：每个节点仅指向下一个节点。</li>
-<li><strong>双链表</strong>：每个节点同时指向前一个和后一个节点，便于双向遍历。</li>
-</ul>
-</li>
-<li><strong>优缺点分析</strong>  <ul>
-<li>优点：插入和删除操作的时间复杂度为O(1)。</li>
-<li>缺点：不能随机访问，查找某个元素需要遍历链表。</li>
-</ul>
-</li>
-<li><strong>典型应用</strong>  <ul>
-<li><strong>LRU缓存</strong>：使用双向链表和哈希表实现最近最少使用（Least Recently Used）缓存策略。</li>
-<li><strong>队列</strong>：使用链表实现的队列，支持高效的入队和出队操作。</li>
-</ul>
-</li>
-</ul>
-<h5 id="栈与队列"><a href="#栈与队列" class="headerlink" title="栈与队列"></a><strong>栈与队列</strong></h5><ul>
-<li><p><strong>栈 (Stack)</strong></p>
-<ul>
-<li><strong>定义与特性</strong><br>栈是一种后进先出（LIFO, Last In First Out）数据结构，只有栈顶元素可以被访问。常用于递归问题的处理。<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="type">const</span> <span class="type">int</span> MAX = <span class="number">1000</span>;</span><br><span class="line"><span class="type">int</span> stack[MAX];</span><br><span class="line"><span class="type">int</span> top = <span class="number">-1</span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">push</span><span class="params">(<span class="type">int</span> x)</span> </span>&#123;</span><br><span class="line">    stack[++top] = x;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">pop</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> stack[top--];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
-<li><strong>实际应用</strong>  <ul>
-<li><strong>递归求解</strong>：如深度优先搜索（DFS）中使用栈模拟递归。</li>
-<li><strong>表达式求值</strong>：后缀表达式求值。</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p><strong>队列 (Queue)</strong></p>
-<ul>
-<li><strong>定义与特性</strong><br>队列是一种先进先出（FIFO, First In First Out）数据结构，常用于任务调度、广度优先搜索（BFS）等场景。<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="type">const</span> <span class="type">int</span> MAX = <span class="number">1000</span>;</span><br><span class="line"><span class="type">int</span> queue[MAX];</span><br><span class="line"><span class="type">int</span> front = <span class="number">0</span>, rear = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">enqueue</span><span class="params">(<span class="type">int</span> x)</span> </span>&#123;</span><br><span class="line">    queue[rear++] = x;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">dequeue</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> queue[front++];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
-<li><strong>实际应用</strong>  <ul>
-<li><strong>任务调度</strong>：常用于处理操作系统中的任务调度、打印队列等。</li>
-<li><strong>广度优先搜索 (BFS)</strong>：通过队列实现层序遍历。</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-<h4 id="3-树结构"><a href="#3-树结构" class="headerlink" title="3. 树结构"></a>3. <strong>树结构</strong></h4><h5 id="二叉树-Binary-Tree"><a href="#二叉树-Binary-Tree" class="headerlink" title="二叉树 (Binary Tree)"></a><strong>二叉树 (Binary Tree)</strong></h5><ul>
-<li><strong>定义与特性</strong><br>二叉树是每个节点最多有两个子节点的树结构，子节点分别称为左子节点和右子节点。<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">TreeNode</span> &#123;</span><br><span class="line">    <span class="type">int</span> val;</span><br><span class="line">    TreeNode* left;</span><br><span class="line">    TreeNode* right;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">TreeNode* root = <span class="keyword">new</span> TreeNode&#123;<span class="number">1</span>, <span class="literal">nullptr</span>, <span class="literal">nullptr</span>&#125;;  <span class="comment">// 创建根节点</span></span><br><span class="line">root-&gt;left = <span class="keyword">new</span> TreeNode&#123;<span class="number">2</span>, <span class="literal">nullptr</span>, <span class="literal">nullptr</span>&#125;;  <span class="comment">// 添加左子节点</span></span><br><span class="line">root-&gt;right = <span class="keyword">new</span> TreeNode&#123;<span class="number">3</span>, <span class="literal">nullptr</span>, <span class="literal">nullptr</span>&#125;;  <span class="comment">// 添加右子节点</span></span><br></pre></td></tr></table></figure></li>
-<li><strong>遍历方式</strong><ul>
-<li><strong>前序遍历</strong>：根节点 -&gt; 左子树 -&gt; 右子树</li>
-<li><strong>中序遍历</strong>：左子树 -&gt; 根节点 -&gt; 右子树</li>
-<li><strong>后序遍历</strong>：左子树 -&gt; 右子树 -&gt; 根节点</li>
-<li><strong>层序遍历</strong>：按层访问，常用队列实现<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 递归前序遍历</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">preorder</span><span class="params">(TreeNode* root)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (!root) <span class="keyword">return</span>;</span><br><span class="line">    cout &lt;&lt; root-&gt;val &lt;&lt; <span class="string">&quot; &quot;</span>;</span><br><span class="line">    <span class="built_in">preorder</span>(root-&gt;left);</span><br><span class="line">    <span class="built_in">preorder</span>(root-&gt;right);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-</li>
-</ul>
-</li>
-</ul>
-<h5 id="二叉搜索树-Binary-Search-Tree-BST"><a href="#二叉搜索树-Binary-Search-Tree-BST" class="headerlink" title="二叉搜索树 (Binary Search Tree, BST)"></a><strong>二叉搜索树 (Binary Search Tree, BST)</strong></h5><ul>
-<li><strong>定义与特性</strong><br>二叉搜索树是一种有序二叉树，对于每个节点，其左子树的所有节点值小于该节点值，右子树的所有节点值大于该节点值。<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="function">TreeNode* <span class="title">insert</span><span class="params">(TreeNode* root, <span class="type">int</span> val)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (!root) <span class="keyword">return</span> <span class="keyword">new</span> TreeNode&#123;val, <span class="literal">nullptr</span>, <span class="literal">nullptr</span>&#125;;</span><br><span class="line">    <span class="keyword">if</span> (val &lt; root-&gt;val) root-&gt;left = <span class="built_in">insert</span>(root-&gt;left, val);</span><br><span class="line">    <span class="keyword">else</span> root-&gt;right = <span class="built_in">insert</span>(root-&gt;right, val);</span><br><span class="line">    <span class="keyword">return</span> root;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
-<li><strong>操作</strong>  <ul>
-<li><strong>插入</strong>：新元素按照顺序插入到合适位置。</li>
-<li><strong>查找</strong>：从根节点开始，根据大小关系查找节点。</li>
-<li><strong>删除</strong>：删除节点时需要考虑其子节点的调整。</li>
-</ul>
-</li>
-<li><strong>平衡性问题与优化</strong>  <ul>
-<li><strong>AVL树</strong>：通过旋转保持树的平衡，确保插入、删除、查找操作时间复杂度为O(log n)。</li>
-<li><strong>红黑树</strong>：类似AVL树，但平衡条件稍弱，插入和删除更高效。</li>
-</ul>
-</li>
-</ul>
-<h5 id="堆-Heap"><a href="#堆-Heap" class="headerlink" title="堆 (Heap)"></a><strong>堆 (Heap)</strong></h5><ul>
-<li><strong>定义与特性</strong><br>堆是一棵完全二叉树，分为最大堆和最小堆。最大堆中每个节点的值都大于或等于其子节点，最小堆则相反。<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">heapify</span><span class="params">(<span class="type">int</span> arr[], <span class="type">int</span> n, <span class="type">int</span> i)</span> </span>&#123;</span><br><span class="line">    <span class="type">int</span> largest = i;</span><br><span class="line">    <span class="type">int</span> left = <span class="number">2</span> * i + <span class="number">1</span>;</span><br><span class="line">    <span class="type">int</span> right = <span class="number">2</span> * i + <span class="number">2</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (left &lt; n &amp;&amp; arr[left] &gt; arr[largest]) largest = left;</span><br><span class="line">    <span class="keyword">if</span> (right &lt; n &amp;&amp; arr[right] &gt; arr[largest]) largest = right;</span><br><span class="line">    <span class="keyword">if</span> (largest != i) &#123;</span><br><span class="line">        <span class="built_in">swap</span>(arr[i], arr[largest]);</span><br><span class="line">        <span class="built_in">heapify</span>(arr, n, largest);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
-</ul>
-]]></content>
-      <categories>
-        <category>数据结构与算法</category>
-      </categories>
-      <tags>
-        <tag>数据结构</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>文件基本操作</title>
-    <url>/2023/12/10/%E6%96%87%E4%BB%B6%E5%9F%BA%E6%9C%AC%E6%93%8D%E4%BD%9C/</url>
-    <content><![CDATA[<h3 id="文件基本操作"><a href="#文件基本操作" class="headerlink" title="文件基本操作"></a>文件基本操作</h3><p>（临时抱佛脚，捞捞）</p>
-<span id="more"></span>
-<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span> &#123;</span><br><span class="line">    FILE *file; <span class="comment">// 文件指针</span></span><br><span class="line">    <span class="type">char</span> filename[] = <span class="string">&quot;example.txt&quot;</span>; <span class="comment">// 文件名</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// 打开文件以进行读写操作（如果文件不存在，则创建新文件）</span></span><br><span class="line">    file = fopen(filename, <span class="string">&quot;w+&quot;</span>);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (file == <span class="literal">NULL</span>) &#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;无法打开文件 %s\n&quot;</span>, filename);</span><br><span class="line">        <span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 写入数据到文件</span></span><br><span class="line">    <span class="built_in">fprintf</span>(file, <span class="string">&quot;这是一个文件操作示例。\n&quot;</span>);</span><br><span class="line">    <span class="built_in">fprintf</span>(file, <span class="string">&quot;欢迎使用 C 语言进行文件操作！\n&quot;</span>);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 将文件指针移到文件开头</span></span><br><span class="line">    fseek(file, <span class="number">0</span>, SEEK_SET);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 从文件中读取内容并输出到屏幕上</span></span><br><span class="line">    <span class="type">char</span> buffer[<span class="number">100</span>];</span><br><span class="line">    <span class="keyword">while</span> (fgets(buffer, <span class="keyword">sizeof</span>(buffer), file) != <span class="literal">NULL</span>) &#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;%s&quot;</span>, buffer);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 关闭文件</span></span><br><span class="line">    fclose(file);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-]]></content>
-      <categories>
-        <category>屎山</category>
-      </categories>
-      <tags>
-        <tag>C语言</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>欧几里得算法</title>
     <url>/2023/10/25/%E6%AC%A7%E5%87%A0%E9%87%8C%E5%BE%97%E7%AE%97%E6%B3%95/</url>
     <content><![CDATA[<p>最近发现了这样一种求最大公约数的算法，因此写此篇博客记录一下</p>
@@ -2014,6 +1946,20 @@ PE_{(pos, 2i)} = \sin \left( \frac{pos}{10000^{2i/d}} \right), \quad PE_{(pos, 2
       </categories>
       <tags>
         <tag>算法</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>文件基本操作</title>
+    <url>/2023/12/10/%E6%96%87%E4%BB%B6%E5%9F%BA%E6%9C%AC%E6%93%8D%E4%BD%9C/</url>
+    <content><![CDATA[<h3 id="文件基本操作"><a href="#文件基本操作" class="headerlink" title="文件基本操作"></a>文件基本操作</h3><p>（临时抱佛脚，捞捞）</p>
+<span id="more"></span>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span> &#123;</span><br><span class="line">    FILE *file; <span class="comment">// 文件指针</span></span><br><span class="line">    <span class="type">char</span> filename[] = <span class="string">&quot;example.txt&quot;</span>; <span class="comment">// 文件名</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// 打开文件以进行读写操作（如果文件不存在，则创建新文件）</span></span><br><span class="line">    file = fopen(filename, <span class="string">&quot;w+&quot;</span>);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (file == <span class="literal">NULL</span>) &#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;无法打开文件 %s\n&quot;</span>, filename);</span><br><span class="line">        <span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 写入数据到文件</span></span><br><span class="line">    <span class="built_in">fprintf</span>(file, <span class="string">&quot;这是一个文件操作示例。\n&quot;</span>);</span><br><span class="line">    <span class="built_in">fprintf</span>(file, <span class="string">&quot;欢迎使用 C 语言进行文件操作！\n&quot;</span>);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 将文件指针移到文件开头</span></span><br><span class="line">    fseek(file, <span class="number">0</span>, SEEK_SET);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 从文件中读取内容并输出到屏幕上</span></span><br><span class="line">    <span class="type">char</span> buffer[<span class="number">100</span>];</span><br><span class="line">    <span class="keyword">while</span> (fgets(buffer, <span class="keyword">sizeof</span>(buffer), file) != <span class="literal">NULL</span>) &#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;%s&quot;</span>, buffer);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 关闭文件</span></span><br><span class="line">    fclose(file);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+]]></content>
+      <categories>
+        <category>屎山</category>
+      </categories>
+      <tags>
+        <tag>C语言</tag>
       </tags>
   </entry>
   <entry>
@@ -2225,6 +2171,36 @@ PE_{(pos, 2i)} = \sin \left( \frac{pos}{10000^{2i/d}} \right), \quad PE_{(pos, 2
       </tags>
   </entry>
   <entry>
+    <title>筛去重复元素</title>
+    <url>/2023/12/14/%E7%AD%9B%E5%8E%BB%E9%87%8D%E5%A4%8D%E5%85%83%E7%B4%A0/</url>
+    <content><![CDATA[<h1 id="筛去重复元素"><a href="#筛去重复元素" class="headerlink" title="筛去重复元素"></a>筛去重复元素</h1><p>最近发现这样一道题，大致意思是给定一个数组，其中元素仅有一个只出现一次，其余元素均出现两次，编写程序以找出这个数。</p>
+<p>这里可以用到异或运算。</p>
+<span id="more"></span>
+<p>异或运算法则如下：</p>
+<ol>
+<li><p>交换律：A ^ B = B ^ A</p>
+</li>
+<li><p>结合律：A ^ (B ^ C) = (A ^ B) ^ C</p>
+</li>
+<li><p><strong>恒等律：X ^ 0 = X</strong></p>
+</li>
+<li><p><strong>归零律：X ^ X = 0</strong></p>
+</li>
+<li><p>自反：A ^ B ^ B = A ^ 0 = A</p>
+<p>这里主要用到后三条性质，可以定义变量key，不断与数组元素进行异或运算，某种意义上达到对于数组的压缩储存。</p>
+</li>
+</ol>
+<p>代码实现如下：</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="type">int</span> <span class="title function_">func</span><span class="params">(<span class="type">int</span> *<span class="built_in">array</span>,<span class="type">int</span> num)</span>&#123;</span><br><span class="line">    <span class="type">int</span> key=<span class="number">0</span>;</span><br><span class="line">    <span class="keyword">for</span>(<span class="type">int</span> i=<span class="number">0</span>;i&lt;num;i++)&#123;</span><br><span class="line">        key^=<span class="built_in">array</span>[i];</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> key;</span><br><span class="line">&#125;</span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span>&#123;</span><br><span class="line">    <span class="type">int</span> <span class="built_in">array</span>[]=&#123;<span class="number">1</span>,<span class="number">2</span>,<span class="number">4</span>,<span class="number">6</span>,<span class="number">2</span>,<span class="number">1</span>,<span class="number">4</span>,<span class="number">7</span>,<span class="number">8</span>,<span class="number">9</span>,<span class="number">8</span>,<span class="number">7</span>,<span class="number">9</span>&#125;;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;%d&quot;</span>,func(<span class="built_in">array</span>,<span class="number">13</span>));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+]]></content>
+      <categories>
+        <category>数据结构与算法</category>
+      </categories>
+      <tags>
+        <tag>c语言</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>离散数学（2）</title>
     <url>/2024/03/30/%E7%A6%BB%E6%95%A3%E6%95%B0%E5%AD%A6%EF%BC%882%EF%BC%89/</url>
     <content><![CDATA[<h2 id="离散数学基础（2）"><a href="#离散数学基础（2）" class="headerlink" title="离散数学基础（2）"></a>离散数学基础（2）</h2><p>本篇博客简单理解一下各种映射的本质</p>
@@ -2263,36 +2239,6 @@ PE_{(pos, 2i)} = \sin \left( \frac{pos}{10000^{2i/d}} \right), \quad PE_{(pos, 2
       </tags>
   </entry>
   <entry>
-    <title>筛去重复元素</title>
-    <url>/2023/12/14/%E7%AD%9B%E5%8E%BB%E9%87%8D%E5%A4%8D%E5%85%83%E7%B4%A0/</url>
-    <content><![CDATA[<h1 id="筛去重复元素"><a href="#筛去重复元素" class="headerlink" title="筛去重复元素"></a>筛去重复元素</h1><p>最近发现这样一道题，大致意思是给定一个数组，其中元素仅有一个只出现一次，其余元素均出现两次，编写程序以找出这个数。</p>
-<p>这里可以用到异或运算。</p>
-<span id="more"></span>
-<p>异或运算法则如下：</p>
-<ol>
-<li><p>交换律：A ^ B = B ^ A</p>
-</li>
-<li><p>结合律：A ^ (B ^ C) = (A ^ B) ^ C</p>
-</li>
-<li><p><strong>恒等律：X ^ 0 = X</strong></p>
-</li>
-<li><p><strong>归零律：X ^ X = 0</strong></p>
-</li>
-<li><p>自反：A ^ B ^ B = A ^ 0 = A</p>
-<p>这里主要用到后三条性质，可以定义变量key，不断与数组元素进行异或运算，某种意义上达到对于数组的压缩储存。</p>
-</li>
-</ol>
-<p>代码实现如下：</p>
-<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="type">int</span> <span class="title function_">func</span><span class="params">(<span class="type">int</span> *<span class="built_in">array</span>,<span class="type">int</span> num)</span>&#123;</span><br><span class="line">    <span class="type">int</span> key=<span class="number">0</span>;</span><br><span class="line">    <span class="keyword">for</span>(<span class="type">int</span> i=<span class="number">0</span>;i&lt;num;i++)&#123;</span><br><span class="line">        key^=<span class="built_in">array</span>[i];</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> key;</span><br><span class="line">&#125;</span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span>&#123;</span><br><span class="line">    <span class="type">int</span> <span class="built_in">array</span>[]=&#123;<span class="number">1</span>,<span class="number">2</span>,<span class="number">4</span>,<span class="number">6</span>,<span class="number">2</span>,<span class="number">1</span>,<span class="number">4</span>,<span class="number">7</span>,<span class="number">8</span>,<span class="number">9</span>,<span class="number">8</span>,<span class="number">7</span>,<span class="number">9</span>&#125;;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;%d&quot;</span>,func(<span class="built_in">array</span>,<span class="number">13</span>));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-]]></content>
-      <categories>
-        <category>数据结构与算法</category>
-      </categories>
-      <tags>
-        <tag>c语言</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>线性表</title>
     <url>/2024/09/20/%E7%BA%BF%E6%80%A7%E8%A1%A8/</url>
     <content><![CDATA[<h1 id="学习笔记：顺序表（SQList）的理解与实现"><a href="#学习笔记：顺序表（SQList）的理解与实现" class="headerlink" title="学习笔记：顺序表（SQList）的理解与实现"></a>学习笔记：顺序表（SQList）的理解与实现</h1><h2 id="1-什么是顺序表（SQList）-s"><a href="#1-什么是顺序表（SQList）-s" class="headerlink" title="1. 什么是顺序表（SQList） ß"></a>1. 什么是顺序表（SQList） ß</h2><p>顺序表是一种常见的线性数据结构，其特点是通过一组连续的内存空间来存储数据元素。在顺序表中，每个元素都有一个直接的前驱和后继（除了第一个元素没有前驱，最后一个元素没有后继）。顺序表的操作主要包括插入、删除、查找等。</p>
@@ -2318,6 +2264,34 @@ PE_{(pos, 2i)} = \sin \left( \frac{pos}{10000^{2i/d}} \right), \quad PE_{(pos, 2
       </categories>
       <tags>
         <tag>数据结构</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>蹭饭图</title>
+    <url>/2023/12/19/%E8%B9%AD%E9%A5%AD%E5%9B%BE/</url>
+    <content><![CDATA[<h2 id="19班蹭饭图"><a href="#19班蹭饭图" class="headerlink" title="19班蹭饭图"></a>19班蹭饭图</h2><p><img src="19蹭饭图.png" alt="19班蹭饭图"></p>
+<h2 id="20班蹭饭图"><a href="#20班蹭饭图" class="headerlink" title="20班蹭饭图"></a>20班蹭饭图</h2><p><img src="20蹭饭图.png" alt="20班蹭饭图"></p>
+]]></content>
+      <categories>
+        <category>蹭饭图</category>
+      </categories>
+      <tags>
+        <tag>蹭饭图</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>结构体编程</title>
+    <url>/2023/11/27/%E7%BB%93%E6%9E%84%E4%BD%93%E7%BC%96%E7%A8%8B/</url>
+    <content><![CDATA[<h2 id="题目描述"><a href="#题目描述" class="headerlink" title="题目描述"></a>题目描述</h2><p>屎山测试第二趴</p>
+<span id="more"></span>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line">某校的惯例是在每学期的期末考试之后发放奖学金。发 放</span><br><span class="line">的奖学金共有五种，每项奖学金获取的条件分别如下：</span><br><span class="line"><span class="number">1</span>) 院士奖学金：期末平均成绩高于 <span class="number">80</span> 分（&gt;<span class="number">80</span>），并且在本学期内发表 <span class="number">1</span> 篇或</span><br><span class="line"><span class="number">1</span> 篇以上论文的学生每人均可获得 <span class="number">8000</span> 元；</span><br><span class="line"><span class="number">2</span>) 五四奖学金：期末平均成绩高于 <span class="number">85</span> 分（&gt;<span class="number">85</span>），并且班级评议成绩高于 <span class="number">80</span> 分</span><br><span class="line">（&gt;<span class="number">80</span>）的学生每人均可获得 <span class="number">4000</span> 元；</span><br><span class="line"><span class="number">3</span>) 成绩优秀奖：期末平均成绩高于 <span class="number">90</span> 分（&gt;<span class="number">90</span>）的学生每人均可获得 <span class="number">2000</span> 元；</span><br><span class="line"><span class="number">4</span>) 西部奖学金：期末平均成绩高于 <span class="number">85</span> 分（&gt;<span class="number">85</span>）的西部省份学生每人均可获得</span><br><span class="line"><span class="number">1000</span> 元；</span><br><span class="line"><span class="number">5</span>) 班级贡献奖：班级评议成绩高于 <span class="number">80</span> 分（&gt;<span class="number">80</span>）的学生干部每人均可获得 <span class="number">850</span></span><br><span class="line">元；</span><br><span class="line">只要符合上述条件就可获得相应的奖项，每项奖学金的获奖人数没有限制，每</span><br><span class="line">名学生也可以同时获得多项奖学金。例如姚明的期末平均成绩是 <span class="number">87</span> 分，班级</span><br><span class="line">评议成绩 <span class="number">82</span> 分，同时他还是一位学生干部，那么他可以同时获得五四奖学金</span><br><span class="line">和班级贡献奖，奖金总数是 <span class="number">4850</span> 元。</span><br><span class="line">现在给出若干学生的相关数据（假设总有同学能满足获得奖学金的条件），</span><br><span class="line">程序运行时，要先输入学生人数。提示：<span class="string">&quot;Input n:&quot;</span>，然后逐个输入学生信息：</span><br><span class="line">输入学生姓名提示：<span class="string">&quot;Input name:&quot;</span></span><br><span class="line">输入学生期末平均成绩提示：<span class="string">&quot;Input final score:&quot;</span></span><br><span class="line">输入学生班级评议成绩提示：<span class="string">&quot;Input class score:&quot;</span></span><br><span class="line">输入是否为学生干部提示：<span class="string">&quot;Class cadre or not?(Y/N):&quot;</span></span><br><span class="line">输入是否为西部学生提示：<span class="string">&quot;Students from the West or not?(Y/N):&quot;</span></span><br><span class="line">输入发表文章数量提示：<span class="string">&quot;Input the number of published papers:&quot;</span></span><br><span class="line"><span class="number">1.</span>请定义结构体类型 S</span><br><span class="line"><span class="number">2.</span> 编程输入所有学生的数据（定义 input 函数 ）</span><br><span class="line"><span class="number">3.</span>将所有的学生按照姓名进行排序（定义 sort 函数 <span class="number">10</span> 分）</span><br><span class="line"><span class="number">4.</span>后输出每个人的信息（print 函数）</span><br><span class="line"><span class="number">5.</span>计算每个同学获得的奖金总数（定义 addup 函数）</span><br><span class="line"><span class="number">6.</span>并找到奖金最高者（定义 findMax 函数 <span class="number">5</span> 分），打印出他的名字和奖金数额。</span><br><span class="line"><span class="number">7.</span>主函数。注意请不要使用全局变量。</span><br></pre></td></tr></table></figure>
+<h2 id="代码实现"><a href="#代码实现" class="headerlink" title="代码实现"></a>代码实现</h2><figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;string.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">S</span> &#123;</span></span><br><span class="line">    <span class="type">char</span> name[<span class="number">50</span>];</span><br><span class="line">    <span class="type">float</span> final_score;</span><br><span class="line">    <span class="type">float</span> class_score;</span><br><span class="line">    <span class="type">char</span> is_cadre; <span class="comment">// &#x27;Y&#x27;表示是学生干部，&#x27;N&#x27;表示不是</span></span><br><span class="line">    <span class="type">char</span> is_west; <span class="comment">// &#x27;Y&#x27;表示来自西部省份，&#x27;N&#x27;表示不是</span></span><br><span class="line">    <span class="type">int</span> published_papers;</span><br><span class="line">    <span class="type">int</span> scholarship;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 定义输入函数</span></span><br><span class="line"><span class="type">void</span> <span class="title function_">input</span><span class="params">(<span class="keyword">struct</span> S *s)</span> &#123;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;Input name: &quot;</span>);</span><br><span class="line">    <span class="built_in">scanf</span>(<span class="string">&quot;%s&quot;</span>, s-&gt;name);</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;Input final score: &quot;</span>);</span><br><span class="line">    <span class="built_in">scanf</span>(<span class="string">&quot;%f&quot;</span>, &amp;(s-&gt;final_score));</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;Input class score: &quot;</span>);</span><br><span class="line">    <span class="built_in">scanf</span>(<span class="string">&quot;%f&quot;</span>, &amp;(s-&gt;class_score));</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;Class cadre or not? (Y/N): &quot;</span>);</span><br><span class="line">    <span class="built_in">scanf</span>(<span class="string">&quot; %c&quot;</span>, &amp;(s-&gt;is_cadre));</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;Students from the West or not? (Y/N): &quot;</span>);</span><br><span class="line">    <span class="built_in">scanf</span>(<span class="string">&quot; %c&quot;</span>, &amp;(s-&gt;is_west));</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;Input the number of published papers: &quot;</span>);</span><br><span class="line">    <span class="built_in">scanf</span>(<span class="string">&quot;%d&quot;</span>, &amp;(s-&gt;published_papers));</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 定义排序函数（造个小轮子方便引用qsort）</span></span><br><span class="line"><span class="type">int</span> <span class="title function_">sort</span><span class="params">(<span class="type">const</span> <span class="type">void</span> *a, <span class="type">const</span> <span class="type">void</span> *b)</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="built_in">strcmp</span>(((<span class="keyword">struct</span> S *)a)-&gt;name, ((<span class="keyword">struct</span> S *)b)-&gt;name);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">void</span> <span class="title function_">print</span><span class="params">(<span class="keyword">struct</span> S *s)</span> &#123;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;Name: %s\n&quot;</span>, s-&gt;name);</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;Final score: %.2f\n&quot;</span>, s-&gt;final_score);</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;Class score: %.2f\n&quot;</span>, s-&gt;class_score);</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;Class cadre: %c\n&quot;</span>, s-&gt;is_cadre);</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;Students from the West: %c\n&quot;</span>, s-&gt;is_west);</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;Published papers: %d\n&quot;</span>, s-&gt;published_papers);</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;Scholarship: %d\n&quot;</span>, s-&gt;scholarship);</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;\n&quot;</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">void</span> <span class="title function_">addup</span><span class="params">(<span class="keyword">struct</span> S *s)</span> &#123;</span><br><span class="line">    s-&gt;scholarship = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (s-&gt;final_score &gt; <span class="number">80</span> &amp;&amp; s-&gt;published_papers &gt;= <span class="number">1</span>) &#123;</span><br><span class="line">        s-&gt;scholarship += <span class="number">8000</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (s-&gt;final_score &gt; <span class="number">85</span> &amp;&amp; s-&gt;class_score &gt; <span class="number">80</span>) &#123;</span><br><span class="line">        s-&gt;scholarship += <span class="number">4000</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (s-&gt;final_score &gt; <span class="number">90</span>) &#123;</span><br><span class="line">        s-&gt;scholarship += <span class="number">2000</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (s-&gt;final_score &gt; <span class="number">85</span> &amp;&amp; s-&gt;is_west == <span class="string">&#x27;Y&#x27;</span>) &#123;</span><br><span class="line">        s-&gt;scholarship += <span class="number">1000</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (s-&gt;class_score &gt; <span class="number">80</span> &amp;&amp; s-&gt;is_cadre == <span class="string">&#x27;Y&#x27;</span>) &#123;</span><br><span class="line">        s-&gt;scholarship += <span class="number">850</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">struct</span> S <span class="title function_">findMax</span><span class="params">(<span class="keyword">struct</span> S *students, <span class="type">int</span> n)</span> &#123;</span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">S</span> <span class="title">maxStudent</span> =</span> students[<span class="number">0</span>];</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">1</span>; i &lt; n; i++) &#123;</span><br><span class="line">        <span class="keyword">if</span> (students[i].scholarship &gt; maxStudent.scholarship) &#123;</span><br><span class="line">            maxStudent = students[i];</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> maxStudent;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span> &#123;</span><br><span class="line">    <span class="type">int</span> n;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;Input n: &quot;</span>);</span><br><span class="line">    <span class="built_in">scanf</span>(<span class="string">&quot;%d&quot;</span>, &amp;n);</span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">S</span> *<span class="title">students</span> =</span> (<span class="keyword">struct</span> S *)<span class="built_in">malloc</span>(n * <span class="keyword">sizeof</span>(<span class="keyword">struct</span> S));</span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; n; i++) &#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;\nEnter data for student %d:\n&quot;</span>, i + <span class="number">1</span>);</span><br><span class="line">        input(&amp;students[i]);</span><br><span class="line">        addup(&amp;students[i]);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    qsort(students, n, <span class="keyword">sizeof</span>(<span class="keyword">struct</span> S), sort);<span class="comment">//按名字排序</span></span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;\nStudent information:\n&quot;</span>);</span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; n; i++) &#123;</span><br><span class="line">        print(&amp;students[i]);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">S</span> <span class="title">maxStudent</span> =</span> findMax(students, n);</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;\nStudent with the highest scholarship:\n&quot;</span>);</span><br><span class="line">    print(&amp;maxStudent);</span><br><span class="line">    <span class="built_in">free</span>(students);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+]]></content>
+      <categories>
+        <category>屎山</category>
+      </categories>
+      <tags>
+        <tag>C语言</tag>
       </tags>
   </entry>
   <entry>
@@ -2351,34 +2325,6 @@ PE_{(pos, 2i)} = \sin \left( \frac{pos}{10000^{2i/d}} \right), \quad PE_{(pos, 2
       </categories>
       <tags>
         <tag>算法</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>结构体编程</title>
-    <url>/2023/11/27/%E7%BB%93%E6%9E%84%E4%BD%93%E7%BC%96%E7%A8%8B/</url>
-    <content><![CDATA[<h2 id="题目描述"><a href="#题目描述" class="headerlink" title="题目描述"></a>题目描述</h2><p>屎山测试第二趴</p>
-<span id="more"></span>
-<figure class="highlight c"><table><tr><td class="code"><pre><span class="line">某校的惯例是在每学期的期末考试之后发放奖学金。发 放</span><br><span class="line">的奖学金共有五种，每项奖学金获取的条件分别如下：</span><br><span class="line"><span class="number">1</span>) 院士奖学金：期末平均成绩高于 <span class="number">80</span> 分（&gt;<span class="number">80</span>），并且在本学期内发表 <span class="number">1</span> 篇或</span><br><span class="line"><span class="number">1</span> 篇以上论文的学生每人均可获得 <span class="number">8000</span> 元；</span><br><span class="line"><span class="number">2</span>) 五四奖学金：期末平均成绩高于 <span class="number">85</span> 分（&gt;<span class="number">85</span>），并且班级评议成绩高于 <span class="number">80</span> 分</span><br><span class="line">（&gt;<span class="number">80</span>）的学生每人均可获得 <span class="number">4000</span> 元；</span><br><span class="line"><span class="number">3</span>) 成绩优秀奖：期末平均成绩高于 <span class="number">90</span> 分（&gt;<span class="number">90</span>）的学生每人均可获得 <span class="number">2000</span> 元；</span><br><span class="line"><span class="number">4</span>) 西部奖学金：期末平均成绩高于 <span class="number">85</span> 分（&gt;<span class="number">85</span>）的西部省份学生每人均可获得</span><br><span class="line"><span class="number">1000</span> 元；</span><br><span class="line"><span class="number">5</span>) 班级贡献奖：班级评议成绩高于 <span class="number">80</span> 分（&gt;<span class="number">80</span>）的学生干部每人均可获得 <span class="number">850</span></span><br><span class="line">元；</span><br><span class="line">只要符合上述条件就可获得相应的奖项，每项奖学金的获奖人数没有限制，每</span><br><span class="line">名学生也可以同时获得多项奖学金。例如姚明的期末平均成绩是 <span class="number">87</span> 分，班级</span><br><span class="line">评议成绩 <span class="number">82</span> 分，同时他还是一位学生干部，那么他可以同时获得五四奖学金</span><br><span class="line">和班级贡献奖，奖金总数是 <span class="number">4850</span> 元。</span><br><span class="line">现在给出若干学生的相关数据（假设总有同学能满足获得奖学金的条件），</span><br><span class="line">程序运行时，要先输入学生人数。提示：<span class="string">&quot;Input n:&quot;</span>，然后逐个输入学生信息：</span><br><span class="line">输入学生姓名提示：<span class="string">&quot;Input name:&quot;</span></span><br><span class="line">输入学生期末平均成绩提示：<span class="string">&quot;Input final score:&quot;</span></span><br><span class="line">输入学生班级评议成绩提示：<span class="string">&quot;Input class score:&quot;</span></span><br><span class="line">输入是否为学生干部提示：<span class="string">&quot;Class cadre or not?(Y/N):&quot;</span></span><br><span class="line">输入是否为西部学生提示：<span class="string">&quot;Students from the West or not?(Y/N):&quot;</span></span><br><span class="line">输入发表文章数量提示：<span class="string">&quot;Input the number of published papers:&quot;</span></span><br><span class="line"><span class="number">1.</span>请定义结构体类型 S</span><br><span class="line"><span class="number">2.</span> 编程输入所有学生的数据（定义 input 函数 ）</span><br><span class="line"><span class="number">3.</span>将所有的学生按照姓名进行排序（定义 sort 函数 <span class="number">10</span> 分）</span><br><span class="line"><span class="number">4.</span>后输出每个人的信息（print 函数）</span><br><span class="line"><span class="number">5.</span>计算每个同学获得的奖金总数（定义 addup 函数）</span><br><span class="line"><span class="number">6.</span>并找到奖金最高者（定义 findMax 函数 <span class="number">5</span> 分），打印出他的名字和奖金数额。</span><br><span class="line"><span class="number">7.</span>主函数。注意请不要使用全局变量。</span><br></pre></td></tr></table></figure>
-<h2 id="代码实现"><a href="#代码实现" class="headerlink" title="代码实现"></a>代码实现</h2><figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;string.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">S</span> &#123;</span></span><br><span class="line">    <span class="type">char</span> name[<span class="number">50</span>];</span><br><span class="line">    <span class="type">float</span> final_score;</span><br><span class="line">    <span class="type">float</span> class_score;</span><br><span class="line">    <span class="type">char</span> is_cadre; <span class="comment">// &#x27;Y&#x27;表示是学生干部，&#x27;N&#x27;表示不是</span></span><br><span class="line">    <span class="type">char</span> is_west; <span class="comment">// &#x27;Y&#x27;表示来自西部省份，&#x27;N&#x27;表示不是</span></span><br><span class="line">    <span class="type">int</span> published_papers;</span><br><span class="line">    <span class="type">int</span> scholarship;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 定义输入函数</span></span><br><span class="line"><span class="type">void</span> <span class="title function_">input</span><span class="params">(<span class="keyword">struct</span> S *s)</span> &#123;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;Input name: &quot;</span>);</span><br><span class="line">    <span class="built_in">scanf</span>(<span class="string">&quot;%s&quot;</span>, s-&gt;name);</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;Input final score: &quot;</span>);</span><br><span class="line">    <span class="built_in">scanf</span>(<span class="string">&quot;%f&quot;</span>, &amp;(s-&gt;final_score));</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;Input class score: &quot;</span>);</span><br><span class="line">    <span class="built_in">scanf</span>(<span class="string">&quot;%f&quot;</span>, &amp;(s-&gt;class_score));</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;Class cadre or not? (Y/N): &quot;</span>);</span><br><span class="line">    <span class="built_in">scanf</span>(<span class="string">&quot; %c&quot;</span>, &amp;(s-&gt;is_cadre));</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;Students from the West or not? (Y/N): &quot;</span>);</span><br><span class="line">    <span class="built_in">scanf</span>(<span class="string">&quot; %c&quot;</span>, &amp;(s-&gt;is_west));</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;Input the number of published papers: &quot;</span>);</span><br><span class="line">    <span class="built_in">scanf</span>(<span class="string">&quot;%d&quot;</span>, &amp;(s-&gt;published_papers));</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 定义排序函数（造个小轮子方便引用qsort）</span></span><br><span class="line"><span class="type">int</span> <span class="title function_">sort</span><span class="params">(<span class="type">const</span> <span class="type">void</span> *a, <span class="type">const</span> <span class="type">void</span> *b)</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="built_in">strcmp</span>(((<span class="keyword">struct</span> S *)a)-&gt;name, ((<span class="keyword">struct</span> S *)b)-&gt;name);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">void</span> <span class="title function_">print</span><span class="params">(<span class="keyword">struct</span> S *s)</span> &#123;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;Name: %s\n&quot;</span>, s-&gt;name);</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;Final score: %.2f\n&quot;</span>, s-&gt;final_score);</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;Class score: %.2f\n&quot;</span>, s-&gt;class_score);</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;Class cadre: %c\n&quot;</span>, s-&gt;is_cadre);</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;Students from the West: %c\n&quot;</span>, s-&gt;is_west);</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;Published papers: %d\n&quot;</span>, s-&gt;published_papers);</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;Scholarship: %d\n&quot;</span>, s-&gt;scholarship);</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;\n&quot;</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">void</span> <span class="title function_">addup</span><span class="params">(<span class="keyword">struct</span> S *s)</span> &#123;</span><br><span class="line">    s-&gt;scholarship = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (s-&gt;final_score &gt; <span class="number">80</span> &amp;&amp; s-&gt;published_papers &gt;= <span class="number">1</span>) &#123;</span><br><span class="line">        s-&gt;scholarship += <span class="number">8000</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (s-&gt;final_score &gt; <span class="number">85</span> &amp;&amp; s-&gt;class_score &gt; <span class="number">80</span>) &#123;</span><br><span class="line">        s-&gt;scholarship += <span class="number">4000</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (s-&gt;final_score &gt; <span class="number">90</span>) &#123;</span><br><span class="line">        s-&gt;scholarship += <span class="number">2000</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (s-&gt;final_score &gt; <span class="number">85</span> &amp;&amp; s-&gt;is_west == <span class="string">&#x27;Y&#x27;</span>) &#123;</span><br><span class="line">        s-&gt;scholarship += <span class="number">1000</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (s-&gt;class_score &gt; <span class="number">80</span> &amp;&amp; s-&gt;is_cadre == <span class="string">&#x27;Y&#x27;</span>) &#123;</span><br><span class="line">        s-&gt;scholarship += <span class="number">850</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">struct</span> S <span class="title function_">findMax</span><span class="params">(<span class="keyword">struct</span> S *students, <span class="type">int</span> n)</span> &#123;</span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">S</span> <span class="title">maxStudent</span> =</span> students[<span class="number">0</span>];</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">1</span>; i &lt; n; i++) &#123;</span><br><span class="line">        <span class="keyword">if</span> (students[i].scholarship &gt; maxStudent.scholarship) &#123;</span><br><span class="line">            maxStudent = students[i];</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> maxStudent;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span> &#123;</span><br><span class="line">    <span class="type">int</span> n;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;Input n: &quot;</span>);</span><br><span class="line">    <span class="built_in">scanf</span>(<span class="string">&quot;%d&quot;</span>, &amp;n);</span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">S</span> *<span class="title">students</span> =</span> (<span class="keyword">struct</span> S *)<span class="built_in">malloc</span>(n * <span class="keyword">sizeof</span>(<span class="keyword">struct</span> S));</span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; n; i++) &#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;\nEnter data for student %d:\n&quot;</span>, i + <span class="number">1</span>);</span><br><span class="line">        input(&amp;students[i]);</span><br><span class="line">        addup(&amp;students[i]);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    qsort(students, n, <span class="keyword">sizeof</span>(<span class="keyword">struct</span> S), sort);<span class="comment">//按名字排序</span></span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;\nStudent information:\n&quot;</span>);</span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; n; i++) &#123;</span><br><span class="line">        print(&amp;students[i]);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">S</span> <span class="title">maxStudent</span> =</span> findMax(students, n);</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;\nStudent with the highest scholarship:\n&quot;</span>);</span><br><span class="line">    print(&amp;maxStudent);</span><br><span class="line">    <span class="built_in">free</span>(students);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
-]]></content>
-      <categories>
-        <category>屎山</category>
-      </categories>
-      <tags>
-        <tag>C语言</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>蹭饭图</title>
-    <url>/2023/12/19/%E8%B9%AD%E9%A5%AD%E5%9B%BE/</url>
-    <content><![CDATA[<h2 id="19班蹭饭图"><a href="#19班蹭饭图" class="headerlink" title="19班蹭饭图"></a>19班蹭饭图</h2><p><img src="19蹭饭图.png" alt="19班蹭饭图"></p>
-<h2 id="20班蹭饭图"><a href="#20班蹭饭图" class="headerlink" title="20班蹭饭图"></a>20班蹭饭图</h2><p><img src="20蹭饭图.png" alt="20班蹭饭图"></p>
-]]></content>
-      <categories>
-        <category>蹭饭图</category>
-      </categories>
-      <tags>
-        <tag>蹭饭图</tag>
       </tags>
   </entry>
   <entry>
@@ -2422,6 +2368,111 @@ PE_{(pos, 2i)} = \sin \left( \frac{pos}{10000^{2i/d}} \right), \quad PE_{(pos, 2
       </categories>
       <tags>
         <tag>高精度</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>数据结构的深度思考和总结</title>
+    <url>/2024/10/02/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E7%9A%84%E6%B7%B1%E5%BA%A6%E6%80%9D%E8%80%83%E5%92%8C%E6%80%BB%E7%BB%93/</url>
+    <content><![CDATA[<h4 id="1-数据结构的本质"><a href="#1-数据结构的本质" class="headerlink" title="1.数据结构的本质"></a>1.数据结构的本质</h4><p>数据结构的本质其实就是<strong>链表和数组</strong>，其他复杂的数据结构不过是这些基本结构的高级抽象。无论是树、栈、队列，还是更高级的图结构，归根结底都是基于数组或链表构建的。它们通过底层的实现细节和不同的逻辑组织方式，提供了更易用的API接口。</p>
+<span id="more"></span>
+<p><img src="DataStructure.png" alt="DataStructure"></p>
+<p>比如，<strong>树</strong>这种数据结构，既可以用数组来实现，也可以用链表构建。数组的优势在于可以通过索引快速访问，节省空间，而链表的优势则在于高效的插入和删除操作。但链表由于使用指针，会占用更多的空间。</p>
+<p>我们可以从<strong>Redis</strong>的实现上看到这一点，它内部有字符串、集合等数据结构，每一种数据类型都有不同的实现方式。其实，我们自己也可以根据具体的业务场景，设计并实现出个性化的数据结构，并定义一些适合当前业务需求的API接口。</p>
+<p>语言层面也为我们提供了丰富的数据结构工具。比如在<strong>Python</strong>中，除了常用的字典和列表外，还可以通过<code>collections</code>模块找到一些更灵活和高效的数据类型，如<code>defaultdict</code>、双端队列<code>deque</code>、计数器<code>Counter</code>等。<strong>Java</strong>的<code>java.util</code>包中也包含了大量用于扩展基础数据结构的工具类。</p>
+<p>综上所述，数据结构的底层其实就是<strong>数组和链表</strong>。无论是集合还是字典，都是通过哈希函数来将元素映射到具体的存储位置上。</p>
+<h4 id="那么，算法的本质是什么？"><a href="#那么，算法的本质是什么？" class="headerlink" title="那么，算法的本质是什么？"></a>那么，算法的本质是什么？</h4><p>算法的本质其实就是<strong>穷举</strong>。但穷举并不是那么简单的，它需要做到两点：<strong>不漏</strong>和<strong>聪明的穷举</strong>。</p>
+<p>计算机与人类解决问题的思维方式完全不同。人类可能通过一个公式就能解决问题，而计算机则依赖<strong>计算能力</strong>不断进行尝试，直到得到结果。计算机最大的优点就是速度快、不怕累。因此，算法就是用<strong>计算机语言</strong>把人的问题转化为机器能够执行的程序，通过不断的尝试来解决。</p>
+<h5 id="1-不漏"><a href="#1-不漏" class="headerlink" title="1. 不漏"></a>1. <strong>不漏</strong></h5><p>“不漏”指的是算法给出的解答必须是完整的。比如很多组合问题常用<strong>回溯算法</strong>来解决，算法需要确保所有可能的解都被考虑到，没有遗漏。</p>
+<h5 id="2-聪明的穷举"><a href="#2-聪明的穷举" class="headerlink" title="2. 聪明的穷举"></a>2. <strong>聪明的穷举</strong></h5><p>“聪明的穷举”就是通过优化策略来提高效率。最简单的算法可能是暴力破解，但它通常效率低下。为了提高效率，我们需要进行优化，而所有的优化手段，归根结底都是为了<strong>更聪明地穷举</strong>。</p>
+<p>举个例子，<strong>双指针</strong>和<strong>滑动窗口</strong>技巧就是为了在穷举过程中减少不必要的时间消耗。相比于传统的双重循环，它们能显著提高时间效率。同样的，有时可以选择更合适的数据结构来减少穷举，比如使用双链表代替单链表，可以节省一定的操作步骤。</p>
+<p>在算法设计中，还有一些优化技巧，比如<strong>剪枝</strong>，即在遍历树时提早终止不必要的分支；又比如<strong>记忆化搜索</strong>，通过缓存中间结果来避免重复计算。</p>
+<h2 id="综上所述，数据结构其实就是在说程序存储和读取数据的方法，算法则是在说计算方法不同导致的资源占用和效率不同"><a href="#综上所述，数据结构其实就是在说程序存储和读取数据的方法，算法则是在说计算方法不同导致的资源占用和效率不同" class="headerlink" title="综上所述，数据结构其实就是在说程序存储和读取数据的方法，算法则是在说计算方法不同导致的资源占用和效率不同"></a><strong>综上所述，数据结构其实就是在说程序存储和读取数据的方法，算法则是在说计算方法不同导致的资源占用和效率不同</strong></h2><h4 id="2-线性数据结构"><a href="#2-线性数据结构" class="headerlink" title="2. 线性数据结构"></a>2. <strong>线性数据结构</strong></h4><h5 id="数组-Array"><a href="#数组-Array" class="headerlink" title="数组 (Array)"></a><strong>数组 (Array)</strong></h5><ul>
+<li><strong>定义与特性</strong><br>数组是内存中连续分配的元素集合，支持常数时间的随机访问。<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="type">int</span> arr[<span class="number">5</span>] = &#123;<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>&#125;;  <span class="comment">// 定义一个包含5个整数的数组</span></span><br><span class="line"><span class="type">int</span> element = arr[<span class="number">2</span>];  <span class="comment">// 访问索引为2的元素</span></span><br><span class="line">arr[<span class="number">1</span>] = <span class="number">10</span>;  <span class="comment">// 修改索引为1的元素</span></span><br></pre></td></tr></table></figure></li>
+<li><strong>优缺点分析</strong>  <ul>
+<li>优点：支持常数时间的随机访问，适合查找场景。</li>
+<li>缺点：插入和删除操作需要移动大量元素，效率较低。</li>
+</ul>
+</li>
+<li><strong>典型应用场景与变体</strong>  <ul>
+<li><strong>动态数组</strong>：大小可动态变化的数组，如C++中的<code>std::vector</code>。  </li>
+<li><strong>稀疏矩阵</strong>：存储少量非零元素的矩阵，节省内存。</li>
+</ul>
+</li>
+</ul>
+<h5 id="链表-Linked-List"><a href="#链表-Linked-List" class="headerlink" title="链表 (Linked List)"></a><strong>链表 (Linked List)</strong></h5><ul>
+<li><strong>定义与特性</strong><br>链表是由一系列节点组成的，每个节点包含数据和指向下一个节点的指针。支持高效的插入和删除操作。<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">Node</span> &#123;</span><br><span class="line">    <span class="type">int</span> data;</span><br><span class="line">    Node* next;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">Node* head = <span class="literal">nullptr</span>;  <span class="comment">// 创建一个空链表</span></span><br><span class="line">Node* newNode = <span class="keyword">new</span> Node&#123;<span class="number">10</span>, <span class="literal">nullptr</span>&#125;;  <span class="comment">// 创建一个新节点</span></span><br><span class="line">head = newNode;  <span class="comment">// 将新节点作为链表头部</span></span><br></pre></td></tr></table></figure></li>
+<li><strong>单链表与双链表</strong>  <ul>
+<li><strong>单链表</strong>：每个节点仅指向下一个节点。</li>
+<li><strong>双链表</strong>：每个节点同时指向前一个和后一个节点，便于双向遍历。</li>
+</ul>
+</li>
+<li><strong>优缺点分析</strong>  <ul>
+<li>优点：插入和删除操作的时间复杂度为O(1)。</li>
+<li>缺点：不能随机访问，查找某个元素需要遍历链表。</li>
+</ul>
+</li>
+<li><strong>典型应用</strong>  <ul>
+<li><strong>LRU缓存</strong>：使用双向链表和哈希表实现最近最少使用（Least Recently Used）缓存策略。</li>
+<li><strong>队列</strong>：使用链表实现的队列，支持高效的入队和出队操作。</li>
+</ul>
+</li>
+</ul>
+<h5 id="栈与队列"><a href="#栈与队列" class="headerlink" title="栈与队列"></a><strong>栈与队列</strong></h5><ul>
+<li><p><strong>栈 (Stack)</strong></p>
+<ul>
+<li><strong>定义与特性</strong><br>栈是一种后进先出（LIFO, Last In First Out）数据结构，只有栈顶元素可以被访问。常用于递归问题的处理。<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="type">const</span> <span class="type">int</span> MAX = <span class="number">1000</span>;</span><br><span class="line"><span class="type">int</span> stack[MAX];</span><br><span class="line"><span class="type">int</span> top = <span class="number">-1</span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">push</span><span class="params">(<span class="type">int</span> x)</span> </span>&#123;</span><br><span class="line">    stack[++top] = x;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">pop</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> stack[top--];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+<li><strong>实际应用</strong>  <ul>
+<li><strong>递归求解</strong>：如深度优先搜索（DFS）中使用栈模拟递归。</li>
+<li><strong>表达式求值</strong>：后缀表达式求值。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p><strong>队列 (Queue)</strong></p>
+<ul>
+<li><strong>定义与特性</strong><br>队列是一种先进先出（FIFO, First In First Out）数据结构，常用于任务调度、广度优先搜索（BFS）等场景。<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="type">const</span> <span class="type">int</span> MAX = <span class="number">1000</span>;</span><br><span class="line"><span class="type">int</span> queue[MAX];</span><br><span class="line"><span class="type">int</span> front = <span class="number">0</span>, rear = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">enqueue</span><span class="params">(<span class="type">int</span> x)</span> </span>&#123;</span><br><span class="line">    queue[rear++] = x;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">dequeue</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> queue[front++];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+<li><strong>实际应用</strong>  <ul>
+<li><strong>任务调度</strong>：常用于处理操作系统中的任务调度、打印队列等。</li>
+<li><strong>广度优先搜索 (BFS)</strong>：通过队列实现层序遍历。</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h4 id="3-树结构"><a href="#3-树结构" class="headerlink" title="3. 树结构"></a>3. <strong>树结构</strong></h4><h5 id="二叉树-Binary-Tree"><a href="#二叉树-Binary-Tree" class="headerlink" title="二叉树 (Binary Tree)"></a><strong>二叉树 (Binary Tree)</strong></h5><ul>
+<li><strong>定义与特性</strong><br>二叉树是每个节点最多有两个子节点的树结构，子节点分别称为左子节点和右子节点。<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">TreeNode</span> &#123;</span><br><span class="line">    <span class="type">int</span> val;</span><br><span class="line">    TreeNode* left;</span><br><span class="line">    TreeNode* right;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">TreeNode* root = <span class="keyword">new</span> TreeNode&#123;<span class="number">1</span>, <span class="literal">nullptr</span>, <span class="literal">nullptr</span>&#125;;  <span class="comment">// 创建根节点</span></span><br><span class="line">root-&gt;left = <span class="keyword">new</span> TreeNode&#123;<span class="number">2</span>, <span class="literal">nullptr</span>, <span class="literal">nullptr</span>&#125;;  <span class="comment">// 添加左子节点</span></span><br><span class="line">root-&gt;right = <span class="keyword">new</span> TreeNode&#123;<span class="number">3</span>, <span class="literal">nullptr</span>, <span class="literal">nullptr</span>&#125;;  <span class="comment">// 添加右子节点</span></span><br></pre></td></tr></table></figure></li>
+<li><strong>遍历方式</strong><ul>
+<li><strong>前序遍历</strong>：根节点 -&gt; 左子树 -&gt; 右子树</li>
+<li><strong>中序遍历</strong>：左子树 -&gt; 根节点 -&gt; 右子树</li>
+<li><strong>后序遍历</strong>：左子树 -&gt; 右子树 -&gt; 根节点</li>
+<li><strong>层序遍历</strong>：按层访问，常用队列实现<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 递归前序遍历</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">preorder</span><span class="params">(TreeNode* root)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (!root) <span class="keyword">return</span>;</span><br><span class="line">    cout &lt;&lt; root-&gt;val &lt;&lt; <span class="string">&quot; &quot;</span>;</span><br><span class="line">    <span class="built_in">preorder</span>(root-&gt;left);</span><br><span class="line">    <span class="built_in">preorder</span>(root-&gt;right);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+</li>
+</ul>
+<h5 id="二叉搜索树-Binary-Search-Tree-BST"><a href="#二叉搜索树-Binary-Search-Tree-BST" class="headerlink" title="二叉搜索树 (Binary Search Tree, BST)"></a><strong>二叉搜索树 (Binary Search Tree, BST)</strong></h5><ul>
+<li><strong>定义与特性</strong><br>二叉搜索树是一种有序二叉树，对于每个节点，其左子树的所有节点值小于该节点值，右子树的所有节点值大于该节点值。<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="function">TreeNode* <span class="title">insert</span><span class="params">(TreeNode* root, <span class="type">int</span> val)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (!root) <span class="keyword">return</span> <span class="keyword">new</span> TreeNode&#123;val, <span class="literal">nullptr</span>, <span class="literal">nullptr</span>&#125;;</span><br><span class="line">    <span class="keyword">if</span> (val &lt; root-&gt;val) root-&gt;left = <span class="built_in">insert</span>(root-&gt;left, val);</span><br><span class="line">    <span class="keyword">else</span> root-&gt;right = <span class="built_in">insert</span>(root-&gt;right, val);</span><br><span class="line">    <span class="keyword">return</span> root;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+<li><strong>操作</strong>  <ul>
+<li><strong>插入</strong>：新元素按照顺序插入到合适位置。</li>
+<li><strong>查找</strong>：从根节点开始，根据大小关系查找节点。</li>
+<li><strong>删除</strong>：删除节点时需要考虑其子节点的调整。</li>
+</ul>
+</li>
+<li><strong>平衡性问题与优化</strong>  <ul>
+<li><strong>AVL树</strong>：通过旋转保持树的平衡，确保插入、删除、查找操作时间复杂度为O(log n)。</li>
+<li><strong>红黑树</strong>：类似AVL树，但平衡条件稍弱，插入和删除更高效。</li>
+</ul>
+</li>
+</ul>
+<h5 id="堆-Heap"><a href="#堆-Heap" class="headerlink" title="堆 (Heap)"></a><strong>堆 (Heap)</strong></h5><ul>
+<li><strong>定义与特性</strong><br>堆是一棵完全二叉树，分为最大堆和最小堆。最大堆中每个节点的值都大于或等于其子节点，最小堆则相反。<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">heapify</span><span class="params">(<span class="type">int</span> arr[], <span class="type">int</span> n, <span class="type">int</span> i)</span> </span>&#123;</span><br><span class="line">    <span class="type">int</span> largest = i;</span><br><span class="line">    <span class="type">int</span> left = <span class="number">2</span> * i + <span class="number">1</span>;</span><br><span class="line">    <span class="type">int</span> right = <span class="number">2</span> * i + <span class="number">2</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (left &lt; n &amp;&amp; arr[left] &gt; arr[largest]) largest = left;</span><br><span class="line">    <span class="keyword">if</span> (right &lt; n &amp;&amp; arr[right] &gt; arr[largest]) largest = right;</span><br><span class="line">    <span class="keyword">if</span> (largest != i) &#123;</span><br><span class="line">        <span class="built_in">swap</span>(arr[i], arr[largest]);</span><br><span class="line">        <span class="built_in">heapify</span>(arr, n, largest);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+</ul>
+]]></content>
+      <categories>
+        <category>数据结构与算法</category>
+      </categories>
+      <tags>
+        <tag>数据结构</tag>
       </tags>
   </entry>
 </search>
