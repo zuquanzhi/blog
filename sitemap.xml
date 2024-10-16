@@ -2,6 +2,24 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>http://zuweicun.top/about/index.html</loc>
+    
+    <lastmod>2024-10-16</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>http://zuweicun.top/movies/index.html</loc>
+    
+    <lastmod>2024-10-16</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
     <loc>http://zuweicun.top/2024/10/15/vim%E4%BB%8E%E5%85%A5%E9%97%A8%E5%88%B0%E5%85%A5%E5%9C%9F/</loc>
     
     <lastmod>2024-10-16</lastmod>
@@ -12,15 +30,6 @@
   
   <url>
     <loc>http://zuweicun.top/link/index.html</loc>
-    
-    <lastmod>2024-10-15</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>http://zuweicun.top/about/index.html</loc>
     
     <lastmod>2024-10-15</lastmod>
     
@@ -479,14 +488,14 @@
 
   
   <url>
-    <loc>http://zuweicun.top/tags/Cmake/</loc>
+    <loc>http://zuweicun.top/tags/%E5%AF%BB%E8%BF%B9%E8%BD%A6-%E8%93%9D%E7%89%99/</loc>
     <lastmod>2024-10-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
-    <loc>http://zuweicun.top/tags/%E5%AF%BB%E8%BF%B9%E8%BD%A6-%E8%93%9D%E7%89%99/</loc>
+    <loc>http://zuweicun.top/tags/Cmake/</loc>
     <lastmod>2024-10-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
